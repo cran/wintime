@@ -1,0 +1,12 @@
+# --------------------
+# Imports
+# --------------------
+importFrom(survival, coxph)
+importFrom(survival, survfit)
+importFrom(survival, Surv)
+importFrom("stats", "coef", "lm", "pnorm", "sd", "vcov")
+
+# --------------------
+# Exports
+# --------------------
+export(wintime, markov, km)

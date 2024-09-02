@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>wintime_vignette</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">wintime_vignette</h1>
+
+
+
+<div id="wintime-package-guide" class="section level1">
+<h1>wintime Package Guide</h1>
+<p>This vignette demonstrates the use of the three available functions
+contained in the wintime package: <code>wintime</code>,
+<code>markov</code>, and <code>km</code>. The <code>wintime</code>
+function is the main function of the package that implements the methods
+described in “Use of win time for ordered composite endpoints in
+clinical trials,” (Troendle et al. 2024), <a href="https://pubmed.ncbi.nlm.nih.gov/38417455/" class="uri">https://pubmed.ncbi.nlm.nih.gov/38417455/</a>. This function
+accepts data with any number of endpoints and runs these methods on
+observed and resampled data. The <code>markov</code> function fits an
+extended Markov model to estimate the state probabilities for each arm.
+The <code>km</code> function performs the same estimation using
+Kaplan-Meier models.</p>
+<div id="installation" class="section level2">
+<h2>Installation</h2>
+<p>To use these functions, you need to have the <code>wintime</code>
+package installed. You can install it from CRAN using the
+<code>install.packages(wintime)</code> command.</p>
+</div>
+<div id="load-required-packages" class="section level2">
+<h2>Load Required Packages</h2>
+<p>Load the <code>wintime</code> package along with the
+<code>survival</code> package.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(wintime)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(survival)</span></code></pre></div>
+</div>
+<div id="example-data" class="section level2">
+<h2>Example Data</h2>
+<p>In this section, we will create example data to demonstrate the use
+of the package functions. The data includes event times, event
+indicators, treatment arm indicators, and optional covariates. We will
+consider a dataset with 3 endpoints ordered into a composite. In this
+dataset, the event time vectors are titled <code>TIME_1</code>,
+<code>TIME_2</code>, and <code>TIME_3</code>. These must be organized
+into a matrix with rows representing events and columns representing
+participants. It is critical that event rows are in INCREASING order of
+severity. The event indicator vectors, titled <code>DELTA_1</code>,
+<code>DELTA_2</code>, and <code>DELTA_3</code>, will be organized the
+same way as the event times. The treatment arm indicator vector, titled
+<code>trt</code>, will be entered as a vector containing 1’s and 0’s
+(control = 0, treatment = 1). Covariates are optional, but if they are
+entered into the <code>wintime</code> function, they must also be
+entered as a matrix. The three covariates in this dataset, titled
+<code>cov1</code>, <code>cov2</code>, and <code>cov3</code>, will be
+organized into a matrix with rows representing participants and columns
+representing covariate values.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Event time vectors</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>TIME_1 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">256</span>,<span class="dv">44</span>,<span class="dv">29</span>,<span class="dv">186</span>,<span class="dv">29</span>,<span class="dv">80</span>,<span class="dv">11</span>,<span class="dv">380</span>,<span class="dv">102</span>,<span class="dv">33</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>TIME_2 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">128</span>,<span class="dv">44</span>,<span class="dv">95</span>,<span class="dv">186</span>,<span class="dv">69</span>,<span class="dv">66</span>,<span class="dv">153</span>,<span class="dv">380</span>,<span class="dv">117</span>,<span class="dv">33</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>TIME_3 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">435</span>,<span class="dv">44</span>,<span class="dv">95</span>,<span class="dv">186</span>,<span class="dv">69</span>,<span class="dv">270</span>,<span class="dv">1063</span>,<span class="dv">380</span>,<span class="dv">117</span>,<span class="dv">33</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co"># Event time matrix</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>Time <span class="ot">&lt;-</span> <span class="fu">rbind</span>(TIME_1, TIME_2, TIME_3)</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co"># Event indicator vectors</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>DELTA_1 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>DELTA_2 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>DELTA_3 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co"># Event indicator matrix</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>Delta <span class="ot">&lt;-</span> <span class="fu">rbind</span>(DELTA_1, DELTA_2, DELTA_3)</span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co"># Treatment arm indicator vector</span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>trt <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>)</span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="co"># Covariate vectors</span></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a>cov1 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">66</span>,<span class="dv">67</span>,<span class="dv">54</span>,<span class="dv">68</span>,<span class="dv">77</span>,<span class="dv">65</span>,<span class="dv">55</span>,<span class="dv">66</span>,<span class="dv">77</span>,<span class="dv">54</span>)</span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a>cov2 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">6</span>,<span class="dv">4</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">8</span>,<span class="dv">5</span>,<span class="dv">3</span>,<span class="dv">5</span>)</span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a>cov3 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">34.6</span>,<span class="fl">543.6</span>,<span class="fl">45.8</span>,<span class="fl">54.7</span>,<span class="fl">44.3</span>,<span class="fl">55.6</span>,<span class="fl">65.9</span>,<span class="fl">54.7</span>,<span class="fl">77.9</span>,<span class="fl">31.2</span>)</span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a></span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a><span class="co"># Covariate matrix</span></span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a>cov <span class="ot">&lt;-</span> <span class="fu">cbind</span>(cov1, cov2, cov3)</span>
+<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Time =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## Time =</code></pre>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">print</span>(Time)</span></code></pre></div>
+<pre><code>##        [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
+## TIME_1  256   44   29  186   29   80   11  380  102    33
+## TIME_2  128   44   95  186   69   66  153  380  117    33
+## TIME_3  435   44   95  186   69  270 1063  380  117    33</code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;Delta =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## Delta =</code></pre>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">print</span>(Delta)</span></code></pre></div>
+<pre><code>##         [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
+## DELTA_1    1    0    1    0    1    1    1    0    1     0
+## DELTA_2    1    0    0    0    0    1    1    0    0     0
+## DELTA_3    0    0    0    0    0    0    0    0    0     0</code></pre>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;trt&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## trt</code></pre>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">print</span>(trt)</span></code></pre></div>
+<pre><code>##  [1] 1 1 1 1 1 0 0 0 0 0</code></pre>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;cov =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## cov =</code></pre>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">print</span>(cov)</span></code></pre></div>
+<pre><code>##       cov1 cov2  cov3
+##  [1,]   66    3  34.6
+##  [2,]   67    6 543.6
+##  [3,]   54    4  45.8
+##  [4,]   68    2  54.7
+##  [5,]   77    3  44.3
+##  [6,]   65    5  55.6
+##  [7,]   55    8  65.9
+##  [8,]   66    5  54.7
+##  [9,]   77    3  77.9
+## [10,]   54    5  31.2</code></pre>
+</div>
+<div id="wintime-function" class="section level2">
+<h2>wintime Function</h2>
+<p>The required arguments for the <code>wintime</code> function are the
+desired win time method, a matrix of event times, a matrix of event
+indicators, and a vector of treatment arm indicators. The win time
+method is entered as a string value indicating which method will be run.
+Methods include: <code>wtr</code>, <code>rwtr</code>, <code>pwt</code>,
+<code>ewtr</code>, <code>ewt</code>, <code>max</code>, and
+<code>rmt</code>. This section will demonstrate the use of each method
+with default settings. Each of these function calls will return a list
+with seven elements: the observed treatment effect, a vector of
+resampled treatment effects (this will be empty with no resampling), a
+message describing which method was used, the variance, the p-value, the
+number of wins for treatment (pairwise methods only), and the number of
+losses for treatment (pairwise methods only).</p>
+<div id="win-time-ratio-wtr" class="section level3">
+<h3>Win time ratio (wtr)</h3>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="co"># Run wtr</span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">wintime</span>(<span class="st">&quot;wtr&quot;</span>, Time, Delta, trt)</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="fu">print</span>(result)</span></code></pre></div>
+<pre><code>## $data
+## [1] 1
+## 
+## $resample_data
+## numeric(0)
+## 
+## $message
+## [1] &quot;Resampling of  wtr  done on  0  bootstraps.&quot;
+## 
+## $variance
+## [1] NA
+## 
+## $p
+## [1] NA
+## 
+## $wins
+## [1] 9
+## 
+## $losses
+## [1] 9</code></pre>
+</div>
+<div id="restricted-win-time-ratio-rwtr" class="section level3">
+<h3>Restricted win time ratio (rwtr)</h3>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="co"># Run rwtr</span></span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">wintime</span>(<span class="st">&quot;rwtr&quot;</span>, Time, Delta, trt)</span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a><span class="fu">print</span>(result)</span></code></pre></div>
+<pre><code>## $data
+## [1] 1
+## 
+## $resample_data
+## numeric(0)
+## 
+## $message
+## [1] &quot;Resampling of  rwtr  done on  0  bootstraps.&quot;
+## 
+## $variance
+## [1] NA
+## 
+## $p
+## [1] NA
+## 
+## $wins
+## [1] 9
+## 
+## $losses
+## [1] 9</code></pre>
+</div>
+<div id="pairwise-win-time-pwt" class="section level3">
+<h3>Pairwise win time (pwt)</h3>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="co"># Run pwt</span></span>
+<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">wintime</span>(<span class="st">&quot;pwt&quot;</span>, Time, Delta, trt)</span>
+<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a><span class="fu">print</span>(result)</span></code></pre></div>
+<pre><code>## $data
+## TIME_1 
+##   1.36 
+## 
+## $resample_data
+## numeric(0)
+## 
+## $message
+## [1] &quot;Resampling of  pwt  done on  0  bootstraps.&quot;
+## 
+## $variance
+## [1] NA
+## 
+## $p
+## TIME_1 
+##     NA 
+## 
+## $wins
+## [1] NA
+## 
+## $losses
+## [1] NA</code></pre>
+</div>
+<div id="expected-win-time-against-reference-ewtr" class="section level3">
+<h3>Expected win time against reference (ewtr)</h3>
+<p>The ewtr method accepts a matrix of covariates as an optional
+argument. If you wish to enter covariates, pass it as the value of
+<code>cov</code>.</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a><span class="co"># Run ewtr with covariates </span></span>
+<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">wintime</span>(<span class="st">&quot;ewtr&quot;</span>, Time, Delta, trt, <span class="at">cov =</span> cov)</span>
+<span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a><span class="fu">print</span>(result)</span></code></pre></div>
+<pre><code>## $data
+##       trt 
+## -150.9492 
+## 
+## $resample_data
+## [1] NA
+## 
+## $message
+## NULL
+## 
+## $variance
+## [1] 14858.91
+## 
+## $p
+##       trt 
+## 0.2155928 
+## 
+## $wins
+## [1] NA
+## 
+## $losses
+## [1] NA</code></pre>
+</div>
+<div id="expected-win-time-ewt" class="section level3">
+<h3>Expected win time (ewt)</h3>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a><span class="co"># Run ewt</span></span>
+<span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">wintime</span>(<span class="st">&quot;ewt&quot;</span>, Time, Delta, trt)</span>
+<span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a><span class="fu">print</span>(result)</span></code></pre></div>
+<pre><code>## $data
+## [1] -37.45417
+## 
+## $resample_data
+## numeric(0)
+## 
+## $message
+## [1] &quot;Resampling of  ewt  done on  0  permutations.&quot;
+## 
+## $variance
+## [1] NA
+## 
+## $p
+## [1] 1
+## 
+## $wins
+## [1] NA
+## 
+## $losses
+## [1] NA</code></pre>
+</div>
+<div id="ewtr-composite-max-test-max" class="section level3">
+<h3>EWTR-composite max test (max)</h3>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a><span class="co"># Run max</span></span>
+<span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">wintime</span>(<span class="st">&quot;max&quot;</span>, Time, Delta, trt, <span class="at">cov =</span> cov)</span>
+<span id="cb28-3"><a href="#cb28-3" tabindex="-1"></a><span class="fu">print</span>(result)</span></code></pre></div>
+<pre><code>## $data
+## [1] -1.238333
+## 
+## $resample_data
+## numeric(0)
+## 
+## $message
+## [1] &quot;Resampling of  max  done on  0  bootstraps.&quot;
+## 
+## $variance
+## [1] NA
+## 
+## $p
+## [1] 1
+## 
+## $wins
+## [1] NA
+## 
+## $losses
+## [1] NA</code></pre>
+</div>
+<div id="restricted-mean-survival-in-favor-of-treatment-rmt" class="section level3">
+<h3>Restricted mean survival in favor of treatment (rmt)</h3>
+<p>For this method, the <code>rmst_restriction</code> argument must be
+passed. This is the cutoff time for the rmt method.</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a><span class="co"># Run rmt</span></span>
+<span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">wintime</span>(<span class="st">&quot;rmt&quot;</span>, Time, Delta, trt, <span class="at">rmst_restriction =</span> <span class="fu">round</span>(<span class="fl">1.5</span><span class="sc">*</span><span class="fl">365.25</span>))</span>
+<span id="cb30-3"><a href="#cb30-3" tabindex="-1"></a><span class="fu">print</span>(result)</span></code></pre></div>
+<pre><code>## $data
+## [1] -37.45417
+## 
+## $resample_data
+## numeric(0)
+## 
+## $message
+## [1] &quot;Resampling of  rmt  done on  0  permutations.&quot;
+## 
+## $variance
+## [1] NA
+## 
+## $p
+## [1] 1
+## 
+## $wins
+## [1] NA
+## 
+## $losses
+## [1] NA</code></pre>
+</div>
+</div>
+<div id="resampling" class="section level2">
+<h2>Resampling</h2>
+<p>In this section, we will demonstrate the use of resampling with a few
+of the win time methods. To run a win time method with resampling, just
+pass the <code>resample_num</code> argument as an integer value that
+tells the <code>wintime</code> function how many times you wish to
+resample. Each method is either resampled with bootstraps or
+permutations by default. The third element of the returned list will
+indicate which resampling technique was used. Resampling involves random
+number generation, so we can pass the optional <code>seed</code>
+argument for replicability.</p>
+<div id="ewt-with-10-resamples" class="section level3">
+<h3>ewt with 10 Resamples</h3>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a><span class="co"># Run ewt with 10 resamples</span></span>
+<span id="cb32-2"><a href="#cb32-2" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">wintime</span>(<span class="st">&quot;ewt&quot;</span>, Time, Delta, trt, <span class="at">resample_num =</span> <span class="dv">10</span>, <span class="at">seed =</span> <span class="dv">123</span>)</span>
+<span id="cb32-3"><a href="#cb32-3" tabindex="-1"></a><span class="fu">print</span>(result)</span></code></pre></div>
+<pre><code>## $data
+## [1] -37.45417
+## 
+## $resample_data
+##  [1] -26.24444  27.36667 -10.50000 -42.28000 -39.88000 -20.44000 -25.80000
+##  [8] -69.53333 -25.80000 -46.50556
+## 
+## $message
+## [1] &quot;Resampling of  ewt  done on  10  permutations.&quot;
+## 
+## $variance
+## [1] 650.4605
+## 
+## $p
+## [1] 0.6363636
+## 
+## $wins
+## [1] NA
+## 
+## $losses
+## [1] NA</code></pre>
+</div>
+<div id="wtr-with-5-resamples" class="section level3">
+<h3>wtr with 5 Resamples</h3>
+<p>It is important to note that <code>wtr</code> is a pairwise method.
+So, with a large number of resamples, it could take several minutes to
+complete execution.</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a><span class="co"># Run wtr with 5 resamples</span></span>
+<span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">wintime</span>(<span class="st">&quot;wtr&quot;</span>, Time, Delta, trt, <span class="at">resample_num =</span> <span class="dv">5</span>)</span>
+<span id="cb34-3"><a href="#cb34-3" tabindex="-1"></a><span class="fu">print</span>(result)</span></code></pre></div>
+<pre><code>## $data
+## [1] 1
+## 
+## $resample_data
+## [1] 1.777778 6.000000 2.666667 1.000000 1.000000
+## 
+## $message
+## [1] &quot;Resampling of  wtr  done on  5  bootstraps.&quot;
+## 
+## $variance
+## [1] 4.324691
+## 
+## $p
+## [1] 1
+## 
+## $wins
+## [1] 9
+## 
+## $losses
+## [1] 9</code></pre>
+</div>
+</div>
+<div id="resampleing-cont." class="section level2">
+<h2>Resampleing Cont.</h2>
+<p>As we mentioned above, each win time method is set up with a default
+resampling technique. This can be overridden by passing the optional
+<code>resample</code> argument. However, this is not recommended. By
+changing the resampling technique, a user will receive a warning
+message.</p>
+<p>For example, if we want to run the ewt method with bootstraps, we can
+do so by passing “boot” as the value for <code>resample</code>.</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a><span class="co"># Run ewt on 10 bootstraps</span></span>
+<span id="cb36-2"><a href="#cb36-2" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">wintime</span>(<span class="st">&quot;ewt&quot;</span>, Time, Delta, trt, <span class="at">resample_num =</span> <span class="dv">10</span>, <span class="at">resample =</span> <span class="st">&quot;boot&quot;</span>)</span></code></pre></div>
+<pre><code>## Warning in wintime(&quot;ewt&quot;, Time, Delta, trt, resample_num = 10, resample =
+## &quot;boot&quot;): For this method, it is strongly recommended to use a KM model and to
+## resample using permutations. These are set as defaults.</code></pre>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" tabindex="-1"></a><span class="fu">print</span>(result)</span></code></pre></div>
+<pre><code>## $data
+## [1] -37.45417
+## 
+## $resample_data
+##  [1] -33.583333 -21.285714 -36.000000   7.518519  48.666667 -24.666667
+##  [7] -36.083333   8.180952 -41.809524 -36.190476
+## 
+## $message
+## [1] &quot;Resampling of  ewt  done on  10  bootstraps.&quot;
+## 
+## $variance
+## [1] 845.1343
+## 
+## $p
+## [1] 0.9090909
+## 
+## $wins
+## [1] NA
+## 
+## $losses
+## [1] NA</code></pre>
+</div>
+<div id="survival-models" class="section level2">
+<h2>Survival Models</h2>
+<p>The <code>wintime</code> package contains two functions that estimate
+the state probabilities for each arm. These will be demonstrated in the
+next section. Each non-pairwise method requires an estimation of the
+state probabilities. These are calculated using either a Markov model or
+a Kaplan-Meier model. Because each method is set up with a default
+model, no input is required. Although, if a user wishes to use one over
+the other, they may do so by passing the optional <code>model</code>
+argument into the <code>wintime</code> function. This will trigger a
+warning message indicating that this combination of <code>type</code>
+and <code>model</code> is not recommended.</p>
+<p>For example, if we want to run the ewtr method using a Kaplan-Meier
+model, we can do so by passing “km” as the value for
+<code>model</code>.</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" tabindex="-1"></a><span class="co"># Run ewtr with a KM model</span></span>
+<span id="cb40-2"><a href="#cb40-2" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">wintime</span>(<span class="st">&quot;ewtr&quot;</span>, Time, Delta, trt, <span class="at">cov =</span> cov, <span class="at">model =</span> <span class="st">&quot;km&quot;</span>)</span></code></pre></div>
+<pre><code>## Warning in wintime(&quot;ewtr&quot;, Time, Delta, trt, cov = cov, model = &quot;km&quot;): For this
+## method, it is strongly recommended to use a Markov model. This is set as a
+## default.</code></pre>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" tabindex="-1"></a><span class="fu">print</span>(result)</span></code></pre></div>
+<pre><code>## $data
+##      trt 
+## -108.094 
+## 
+## $resample_data
+## [1] NA
+## 
+## $message
+## NULL
+## 
+## $variance
+## [1] 12739.96
+## 
+## $p
+##       trt 
+## 0.3382273 
+## 
+## $wins
+## [1] NA
+## 
+## $losses
+## [1] NA</code></pre>
+</div>
+<div id="model-functions" class="section level2">
+<h2>Model Functions</h2>
+<p>To use either the <code>markov</code> or <code>km</code> functions,
+we need the number of control arm patients, the number of treatment arm
+patients, the number of endpoints, a matrix of event times, and a matrix
+of event indicators. Both functions return a list with eight elements: a
+matrix of control arm state probabilities, a matrix of treatment arm
+state probabilities, a vector of unique control arm event times, a
+vector of unique treatment arm event times, the number of unique control
+arm event times, the number of unique treatment arm event times, the
+control arm max follow time, and the treatment arm max follow time.</p>
+<div id="parameters" class="section level3">
+<h3>Parameters</h3>
+<p>The event time and indicator matrices are already defined as
+<code>Time</code> and <code>Delta</code> (see ‘Example Data’ section
+above). The treatment arm indicator vector, <code>trt</code>, is not
+required for these functions, but it is useful in defining other
+parameters. This is also defined in the ‘Example Data’ section.</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" tabindex="-1"></a><span class="co"># Number of control arm patients</span></span>
+<span id="cb44-2"><a href="#cb44-2" tabindex="-1"></a>n0 <span class="ot">&lt;-</span> <span class="fu">sum</span>(trt <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb44-3"><a href="#cb44-3" tabindex="-1"></a></span>
+<span id="cb44-4"><a href="#cb44-4" tabindex="-1"></a><span class="co"># Number of treatment arm patients</span></span>
+<span id="cb44-5"><a href="#cb44-5" tabindex="-1"></a>n1 <span class="ot">&lt;-</span> <span class="fu">sum</span>(trt <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb44-6"><a href="#cb44-6" tabindex="-1"></a></span>
+<span id="cb44-7"><a href="#cb44-7" tabindex="-1"></a><span class="co"># Number of endpoints</span></span>
+<span id="cb44-8"><a href="#cb44-8" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">nrow</span>(Time)</span></code></pre></div>
+</div>
+<div id="markov-function" class="section level3">
+<h3>markov Function</h3>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" tabindex="-1"></a><span class="co"># Run markov</span></span>
+<span id="cb45-2"><a href="#cb45-2" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">markov</span>(n0, n1, m, Time, Delta)</span>
+<span id="cb45-3"><a href="#cb45-3" tabindex="-1"></a></span>
+<span id="cb45-4"><a href="#cb45-4" tabindex="-1"></a><span class="co"># Control arm probabilities</span></span>
+<span id="cb45-5"><a href="#cb45-5" tabindex="-1"></a>dist0 <span class="ot">&lt;-</span> result[[<span class="dv">1</span>]]</span>
+<span id="cb45-6"><a href="#cb45-6" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;dist0 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## dist0 =</code></pre>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" tabindex="-1"></a><span class="fu">print</span>(dist0)</span></code></pre></div>
+<pre><code>##      [,1] [,2] [,3] [,4] [,5] [,6] [,7]
+## [1,]  0.6  0.6  0.6  0.6  0.3  0.3  0.3
+## [2,]  0.4  0.4  0.4  0.4  0.4  0.4  0.4
+## [3,]  0.0  0.0  0.0  0.0  0.3  0.3  0.3
+## [4,]  0.0  0.0  0.0  0.0  0.0  0.0  0.0</code></pre>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" tabindex="-1"></a><span class="co"># Treatment arm probabilities</span></span>
+<span id="cb49-2"><a href="#cb49-2" tabindex="-1"></a>dist1 <span class="ot">&lt;-</span> result[[<span class="dv">2</span>]]</span>
+<span id="cb49-3"><a href="#cb49-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;dist1 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## dist1 =</code></pre>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" tabindex="-1"></a><span class="fu">print</span>(dist1)</span></code></pre></div>
+<pre><code>##      [,1] [,2]      [,3]      [,4]      [,5]      [,6]      [,7]      [,8]
+## [1,]  0.8  0.8 0.5333333 0.2666667 0.2666667 0.2666667 0.2666667 0.2666667
+## [2,]  0.2  0.2 0.2000000 0.4666667 0.4666667 0.0000000 0.0000000 0.0000000
+## [3,]  0.0  0.0 0.2666667 0.2666667 0.2666667 0.7333333 0.7333333 0.7333333
+## [4,]  0.0  0.0 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000
+##           [,9]
+## [1,] 0.2666667
+## [2,] 0.0000000
+## [3,] 0.7333333
+## [4,] 0.0000000</code></pre>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" tabindex="-1"></a><span class="co"># Unique control arm event times</span></span>
+<span id="cb53-2"><a href="#cb53-2" tabindex="-1"></a>untimes0 <span class="ot">&lt;-</span> result[[<span class="dv">3</span>]]</span>
+<span id="cb53-3"><a href="#cb53-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;untimes0 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## untimes0 =</code></pre>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" tabindex="-1"></a><span class="fu">print</span>(untimes0)</span></code></pre></div>
+<pre><code>## [1]  29  44  69  95 128 186 435</code></pre>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" tabindex="-1"></a><span class="co"># Unique treatment arm event times</span></span>
+<span id="cb57-2"><a href="#cb57-2" tabindex="-1"></a>untimes1 <span class="ot">&lt;-</span> result[[<span class="dv">4</span>]]</span>
+<span id="cb57-3"><a href="#cb57-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;untimes1 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## untimes1 =</code></pre>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" tabindex="-1"></a><span class="fu">print</span>(untimes1)</span></code></pre></div>
+<pre><code>## [1]   11   33   66  102  117  153  270  380 1063</code></pre>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" tabindex="-1"></a><span class="co"># Number of unique control arm event times</span></span>
+<span id="cb61-2"><a href="#cb61-2" tabindex="-1"></a>nuntimes0 <span class="ot">&lt;-</span> result[[<span class="dv">5</span>]]</span>
+<span id="cb61-3"><a href="#cb61-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;nuntimes0 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## nuntimes0 =</code></pre>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" tabindex="-1"></a><span class="fu">print</span>(nuntimes0)</span></code></pre></div>
+<pre><code>## [1] 7</code></pre>
+<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" tabindex="-1"></a><span class="co"># Number of unique treatment arm event times</span></span>
+<span id="cb65-2"><a href="#cb65-2" tabindex="-1"></a>nuntimes1 <span class="ot">&lt;-</span> result[[<span class="dv">6</span>]]</span>
+<span id="cb65-3"><a href="#cb65-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;nuntimes1 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## nuntimes1 =</code></pre>
+<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" tabindex="-1"></a><span class="fu">print</span>(nuntimes1)</span></code></pre></div>
+<pre><code>## [1] 9</code></pre>
+<div class="sourceCode" id="cb69"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" tabindex="-1"></a><span class="co"># Control arm max follow time</span></span>
+<span id="cb69-2"><a href="#cb69-2" tabindex="-1"></a>max_follow0 <span class="ot">&lt;-</span> result[[<span class="dv">7</span>]]</span>
+<span id="cb69-3"><a href="#cb69-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;max_follow0 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## max_follow0 =</code></pre>
+<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" tabindex="-1"></a><span class="fu">print</span>(max_follow0)</span></code></pre></div>
+<pre><code>## [1] 95</code></pre>
+<div class="sourceCode" id="cb73"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" tabindex="-1"></a><span class="co"># Treatment arm max follow time</span></span>
+<span id="cb73-2"><a href="#cb73-2" tabindex="-1"></a>max_follow1 <span class="ot">&lt;-</span> result[[<span class="dv">8</span>]]</span>
+<span id="cb73-3"><a href="#cb73-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;max_follow1 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## max_follow1 =</code></pre>
+<div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" tabindex="-1"></a><span class="fu">print</span>(max_follow1)</span></code></pre></div>
+<pre><code>## [1] 380</code></pre>
+</div>
+<div id="km-function" class="section level3">
+<h3>km Function</h3>
+<div class="sourceCode" id="cb77"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" tabindex="-1"></a><span class="co"># Run km</span></span>
+<span id="cb77-2"><a href="#cb77-2" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">km</span>(n0, n1, m, Time, Delta)</span>
+<span id="cb77-3"><a href="#cb77-3" tabindex="-1"></a></span>
+<span id="cb77-4"><a href="#cb77-4" tabindex="-1"></a><span class="co"># Control arm probabilities</span></span>
+<span id="cb77-5"><a href="#cb77-5" tabindex="-1"></a>dist0 <span class="ot">&lt;-</span> result[[<span class="dv">1</span>]]</span>
+<span id="cb77-6"><a href="#cb77-6" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;dist0 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## dist0 =</code></pre>
+<div class="sourceCode" id="cb79"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" tabindex="-1"></a><span class="fu">print</span>(dist0)</span></code></pre></div>
+<pre><code>##      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13] [,14]
+## [1,]  0.6  0.6  0.6  0.6  0.3  0.3    0    0    0     0     0     0     0     0
+## [2,]  0.4  0.4  0.4  0.4  0.2  0.2    0    0    0     0     0     0     0     0
+## [3,]  0.0  0.0  0.0  0.0  0.5  0.5    0    0    0     0     0     0     0     0
+## [4,]  0.0  0.0  0.0  0.0  0.0  0.0    0    0    0     0     0     0     0     0</code></pre>
+<div class="sourceCode" id="cb81"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" tabindex="-1"></a><span class="co"># Treatment arm probabilities</span></span>
+<span id="cb81-2"><a href="#cb81-2" tabindex="-1"></a>dist1 <span class="ot">&lt;-</span> result[[<span class="dv">2</span>]]</span>
+<span id="cb81-3"><a href="#cb81-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;dist1 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## dist1 =</code></pre>
+<div class="sourceCode" id="cb83"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" tabindex="-1"></a><span class="fu">print</span>(dist1)</span></code></pre></div>
+<pre><code>##      [,1] [,2]      [,3]      [,4]      [,5]      [,6]      [,7]      [,8] [,9]
+## [1,]  0.8  0.8 0.5333333 0.2666667 0.2666667 0.2666667 0.2666667 0.2666667    0
+## [2,]  0.2  0.2 0.2166667 0.4833333 0.4833333 0.1083333 0.1083333 0.1083333    0
+## [3,]  0.0  0.0 0.2500000 0.2500000 0.2500000 0.6250000 0.6250000 0.6250000    0
+## [4,]  0.0  0.0 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000    0
+##      [,10] [,11] [,12] [,13] [,14] [,15]
+## [1,]     0     0     0     0     0     0
+## [2,]     0     0     0     0     0     0
+## [3,]     0     0     0     0     0     0
+## [4,]     0     0     0     0     0     0</code></pre>
+<div class="sourceCode" id="cb85"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" tabindex="-1"></a><span class="co"># Unique control arm event times</span></span>
+<span id="cb85-2"><a href="#cb85-2" tabindex="-1"></a>untimes0 <span class="ot">&lt;-</span> result[[<span class="dv">3</span>]]</span>
+<span id="cb85-3"><a href="#cb85-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;untimes0 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## untimes0 =</code></pre>
+<div class="sourceCode" id="cb87"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" tabindex="-1"></a><span class="fu">print</span>(untimes0)</span></code></pre></div>
+<pre><code>## [1]  29  44  69  95 128 186</code></pre>
+<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" tabindex="-1"></a><span class="co"># Unique treatment arm event times</span></span>
+<span id="cb89-2"><a href="#cb89-2" tabindex="-1"></a>untimes1 <span class="ot">&lt;-</span> result[[<span class="dv">4</span>]]</span>
+<span id="cb89-3"><a href="#cb89-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;untimes1 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## untimes1 =</code></pre>
+<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" tabindex="-1"></a><span class="fu">print</span>(untimes1)</span></code></pre></div>
+<pre><code>## [1]  11  33  66 102 117 153 270 380</code></pre>
+<div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" tabindex="-1"></a><span class="co"># Number of unique control arm event times</span></span>
+<span id="cb93-2"><a href="#cb93-2" tabindex="-1"></a>nuntimes0 <span class="ot">&lt;-</span> result[[<span class="dv">5</span>]]</span>
+<span id="cb93-3"><a href="#cb93-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;nuntimes0 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## nuntimes0 =</code></pre>
+<div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" tabindex="-1"></a><span class="fu">print</span>(nuntimes0)</span></code></pre></div>
+<pre><code>## [1] 6</code></pre>
+<div class="sourceCode" id="cb97"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb97-1"><a href="#cb97-1" tabindex="-1"></a><span class="co"># Number of unique treatment arm event times</span></span>
+<span id="cb97-2"><a href="#cb97-2" tabindex="-1"></a>nuntimes1 <span class="ot">&lt;-</span> result[[<span class="dv">6</span>]]</span>
+<span id="cb97-3"><a href="#cb97-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;nuntimes1 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## nuntimes1 =</code></pre>
+<div class="sourceCode" id="cb99"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb99-1"><a href="#cb99-1" tabindex="-1"></a><span class="fu">print</span>(nuntimes1)</span></code></pre></div>
+<pre><code>## [1] 8</code></pre>
+<div class="sourceCode" id="cb101"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1" tabindex="-1"></a><span class="co"># Control arm max follow time</span></span>
+<span id="cb101-2"><a href="#cb101-2" tabindex="-1"></a>max_follow0 <span class="ot">&lt;-</span> result[[<span class="dv">7</span>]]</span>
+<span id="cb101-3"><a href="#cb101-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;max_follow0 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## max_follow0 =</code></pre>
+<div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" tabindex="-1"></a><span class="fu">print</span>(max_follow0)</span></code></pre></div>
+<pre><code>## [1] 186</code></pre>
+<div class="sourceCode" id="cb105"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" tabindex="-1"></a><span class="co"># Treatment arm max follow time</span></span>
+<span id="cb105-2"><a href="#cb105-2" tabindex="-1"></a>max_follow1 <span class="ot">&lt;-</span> result[[<span class="dv">8</span>]]</span>
+<span id="cb105-3"><a href="#cb105-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;max_follow1 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## max_follow1 =</code></pre>
+<div class="sourceCode" id="cb107"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb107-1"><a href="#cb107-1" tabindex="-1"></a><span class="fu">print</span>(max_follow1)</span></code></pre></div>
+<pre><code>## [1] 380</code></pre>
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
