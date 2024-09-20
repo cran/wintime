@@ -1,4 +1,4 @@
-94d00b45b1671747bb5f9610f52efcb9 *DESCRIPTION
+5c92c7a5abe57692982725cf79b3b842 *DESCRIPTION
 5cef32f4477458a24ffb12f53ab63e34 *LICENSE
 4be1a37f21fffff6efa81b968da81317 *NAMESPACE
 8c23418b11975d99242b2a05995b2264 *R/bootstrap.R
@@ -7,7 +7,7 @@ d3b0bde24d932a244666f1235fa7d049 *R/ewt.R
 b233ac1604d0972a3be4c2d432660468 *R/ewtr.R
 2b9ce65ae75c9dc192f0dc17b650caf7 *R/helpers.R
 b8466365e817f89f0f9496ef3fb875d4 *R/km.R
-68b188d4da10bbcecd9efb45508fc603 *R/markov.R
+2eb329233b48f8d384d950cae2a5fed5 *R/markov.R
 b7a989efb5dc3da8b4238c63b3925787 *R/perm.R
 de7850d4d95103b91791d8860147aeec *R/pwt.R
 c5a532a40f70b8f4e70c50e7e50013dd *R/rmt.R
@@ -34,6 +34,6 @@ bbfe7491728e8e7a6d2e9c0fcbf76261 *man/perm.Rd
 661393bd04e037da719251793129c309 *man/setKM.Rd
 bf4ec5980a5112a4efa4c21a0ae02221 *man/wintime.Rd
 289d54f183950382c41c6aeabd6de336 *tests/testthat.R
-8409b241b96f528eaeec4b3005b6b91f *tests/testthat/test-main_wintime_function.R
+23f4af7485da8e0ee12b30c3a4cc81a6 *tests/testthat/test-main_wintime_function.R
 313b74cce4e894be39c95f554dc41fd1 *tests/testthat/test-model_functions.R
 201cca773c8b4968ba3c87ec471936f2 *vignettes/wintime_vignette.Rmd

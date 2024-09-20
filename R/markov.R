@@ -125,12 +125,17 @@ markov <- function(n0,n1,m,Time,Delta) {
     i <- i+1
   }
 
-
+#cat('nevent_times0=',nevent_times0,'\n')
   event_times0=event_times0[1:nevent_times0]
-  trans <- trans[ , ,1:nevent_times0]
+#cat('event_times0=',event_times0,'\n')
+#cat('dim(trans)=',dim(trans),'\n')
+  trans <- trans[ , ,1:nevent_times0,drop=FALSE]
+#cat('dim(trans)=',dim(trans),'\n')
   perm_event_times0=order(event_times0)
+#cat('perm_event_times0=',perm_event_times0,'\n')
   ordered_event_times0=event_times0[perm_event_times0]
   trans <- trans[ , ,perm_event_times0]
+#cat('dim(trans)=',dim(trans),'\n')
   unique_event_times0=ordered_event_times0
   num_state <- matrix(data=0,nrow=m+1,ncol=nevent_times0)
 
@@ -302,7 +307,7 @@ markov <- function(n0,n1,m,Time,Delta) {
 
 
   event_times1=event_times1[1:nevent_times1]
-  trans <- trans[ , ,1:nevent_times1]
+  trans <- trans[ , ,1:nevent_times1,drop=FALSE]
   perm_event_times1=order(event_times1)
   ordered_event_times1=event_times1[perm_event_times1]
   trans <- trans[ , ,perm_event_times1]
