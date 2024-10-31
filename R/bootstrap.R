@@ -111,7 +111,7 @@ bootstrap <- function(type,rmst_restriction,model,n,m,Time,Delta,trt,cov,z_ewtr,
       y[iboot] <- RWTR(n,m,tau,trt_boot,Time_boot,Delta_boot)[[1]]
     }
     else if (type == "pwt") {
-      y[iboot] <- PWT(n,n0,n1,Time_boot,Delta_boot,trt_boot,m,tau)
+      y[iboot] <- PWT(n,n0,n1,m,Time_boot,Delta_boot,trt_boot,tau)
     }
     else if (type == "max") {
       # Observed Z statistic
@@ -123,7 +123,7 @@ bootstrap <- function(type,rmst_restriction,model,n,m,Time,Delta,trt,cov,z_ewtr,
       # ewtr_time_boot <- EWTR(n,m,nuntimes0_boot,max_follow0_boot,untimes0_boot,Time_boot,Delta_boot,dist_state0_boot,markov_ind,cov_boot)[[1]]
       # ewtr_time_var_boot <- EWTR(n,m,nuntimes0_boot,max_follow0_boot,untimes0_boot,Time_boot,Delta_boot,dist_state0_boot,markov_ind,cov_boot)[[2]]
       z_ewtr_boot <- EWTR(n,m,nuntimes0_boot,max_follow0_boot,untimes0_boot,Time_boot,Delta_boot,dist_state0_boot,markov_ind,cov_boot,trt_boot)[[3]]
-      z_comp_boot <- COMP(n,Time_boot,Delta_boot,cov_boot,trt_boot)
+      z_comp_boot <- COMP(n,Time_boot,Delta_boot,cov_boot,trt_boot)[[1]]
       y[iboot] <- max((z_ewtr_boot - z_ewtr),(z_comp_boot - z_comp))
     }
     else {

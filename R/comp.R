@@ -11,7 +11,7 @@
 #' @param cov A n x p matrix of covariate values, where p is the number of covariates. Rows should represent participants and columns
 #' should represent covariate values.
 #' @param trt A vector of length n containing treatment arm indicators (1 for treatment, 0 for control).
-#' @return The z-statistic of the treatment effect from the Cox Model fit.
+#' @return A list containing: The z-statistic of the treatment effect from the Cox Model fit, the treatment effect estimate, the variance of the treatment effect estimate, the p-value for treatment effect.
 
 # --------------------------------
 # Composite Analysis
@@ -31,5 +31,8 @@ COMP <- function(n,Time,Delta,cov,trt) {
     fit <- survival::coxph(survival::Surv(TIME_COMP,DELTA_COMP)~trt)
   }
   z_COMP <- -1*coef(fit)[1]/sqrt(vcov(fit)[1,1])
-  return(z_COMP)
+  est_COMP <- exp(coef(fit)[1])
+  var_COMP=vcov(fit)[1,1]
+  p_COMP <- 2*(1-pnorm(abs(z_COMP),mean=0,sd=1))
+  return(list(z_COMP,est_COMP,var_COMP,p_COMP))
 }

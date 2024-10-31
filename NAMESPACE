@@ -9,4 +9,4 @@ importFrom("stats", "coef", "lm", "pnorm", "sd", "vcov")
 # --------------------
 # Exports
 # --------------------
-export(wintime, markov, km)
+export(wintime, markov, km, COMP)

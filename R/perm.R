@@ -98,7 +98,7 @@ perm <- function(type,rmst_restriction,model,n,m,Time,Delta,trt,cov,z_ewtr,z_com
     else if (type == "max") {
       # Permutation Z statistic
       z_ewtr_perm <- EWTR(n,m,nuntimes0_perm,max_follow0_perm,untimes0_perm,Time_perm,Delta_perm,dist_state0_perm,markov_ind,cov_perm,trt_perm)[[3]]
-      z_comp_perm <- COMP(n,Time_perm,Delta_perm,cov_perm,trt_perm)
+      z_comp_perm <- COMP(n,Time_perm,Delta_perm,cov_perm,trt_perm)[[1]]
       y[iperm] <- max((z_ewtr_perm - z_ewtr),(z_comp_perm - z_comp))
     }
     else {

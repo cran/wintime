@@ -229,7 +229,7 @@ wintime <- function(type,Time,Delta,trt,cov = NULL,model = NULL,resample = NULL,
   # type == "max"
   else {
     z_ewtr <- EWTR(n,m,nuntimes0,max_follow0,untimes0,Time,Delta,dist_state0,markov_ind,cov,trt)[[3]]
-    z_comp <- COMP(n,Time,Delta,cov,trt)
+    z_comp <- COMP(n,Time,Delta,cov,trt)[[1]]
     obs_data <- max(z_ewtr,z_comp)
   }
 

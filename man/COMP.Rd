@@ -21,7 +21,7 @@ should represent covariate values.}
 \item{trt}{A vector of length n containing treatment arm indicators (1 for treatment, 0 for control).}
 }
 \value{
-The z-statistic of the treatment effect from the Cox Model fit.
+A list containing: The z-statistic of the treatment effect from the Cox Model fit, the treatment effect estimate, the variance of the treatment effect estimate, the p-value for treatment effect.
 }
 \description{
 This function fits a Cox Model to time-to-event data and calculates the z statistic. In the wintime package, this function is used for the
