@@ -6,7 +6,7 @@
 \usage{
 perm(
   type,
-  rmst_restriction,
+  time_restriction,
   model,
   n,
   m,
@@ -17,13 +17,14 @@ perm(
   z_ewtr,
   z_comp,
   resample_num,
-  seed
+  seed,
+  nimp
 )
 }
 \arguments{
 \item{type}{A string value indicating the wintime package method that will run with resampling.}
 
-\item{rmst_restriction}{The RMT cutoff value (days).}
+\item{time_restriction}{The time cutoff value (days).}
 
 \item{model}{A string value indicating the model used on observed data ('markov' or 'km').}
 
@@ -49,9 +50,12 @@ represent covariate values.}
 \item{resample_num}{The number of desired permutations.}
 
 \item{seed}{The seed used for random number generation.}
+
+\item{nimp}{The number of random imputations for Redistribution-to-the-right.}
 }
 \value{
-A vector of length resample_num containing the treatment effect estimates (for type='max' these are z-statistics) for each permutation.
+A list of a vector of length resample_num containing the treatment effect estimates (for type='max' these are z-statistics) for each permutation,
+a m x resample_num matrix of the components of the treatment effect..
 }
 \description{
 This function reruns the desired wintime package method on a given number of permutations. This resampling method is recommended

@@ -55,7 +55,9 @@ WTR <- function(n,m,tau,tg,Time,Delta) {
         order <- setEventTimes(m,delta0,delta1,time0,time1,follow)
 
         # Calculate integral
-        integral <- getWintimeIntegral(m,order,time0,time1,delta0,delta1)
+        #cat('call getWintimeIntegral','\n')
+        temp <- getWintimeIntegral(m,order,time0,time1,delta0,delta1)
+        integral <- temp[[1]]
 
         # Update win and loss matrices
         if (integral > 0.0) {
@@ -77,5 +79,6 @@ WTR <- function(n,m,tau,tg,Time,Delta) {
       }
     }
   }
+  #cat('return from WTR','\n')
   return(list(losstot/wintot,wintot,losstot))
 }

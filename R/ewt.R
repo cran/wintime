@@ -10,13 +10,14 @@
 #' @param unique_event_times1 A vector of unique treatment arm event times (days) (returned from wintime::km() or wintime::markov()).
 #' @param nunique_event_times0 The number of unique control arm event times (returned from wintime::km() or wintime::markov()).
 #' @param nunique_event_times1 The number of unique treatment arm event times (returned from wintime::km() or wintime::markov()).
-#' @return The expected win time of the treatment arm.
+#' @return A list of the expected win time of the treatment arm, the components of the treatment effect.
 
 # ------------------------
 # Expected win time
 # ------------------------
 EWT <- function(m,dist_state0,dist_state1,unique_event_times0,unique_event_times1,nunique_event_times0,nunique_event_times1) {
   # cat("Start EWT", "\n")
+  components <- rep(0,m)
   unique_event_times=unique_event_times0
   nunique_event_times=length(unique_event_times)
   new_dist_state1 <- matrix(data=0,nrow=m+1,ncol=nunique_event_times)
@@ -107,11 +108,15 @@ EWT <- function(m,dist_state0,dist_state1,unique_event_times0,unique_event_times
     # Add wintime
     for (event_num in 1:m) {
       ewt_time <- ewt_time + new_dist_state1[event_num,j] * sum(dist_state0[((event_num+1):(m+1)),j]) * (unique_event_times[j+1]-unique_event_times[j])
+      for (k in (event_num+1):(m+1)) {
+        components[k-1] <- components[k-1] + new_dist_state1[event_num,j] * dist_state0[k,j] * (unique_event_times[j+1]-unique_event_times[j])
+      }
     }
 
     # Subtract Wintime
     for (event_num in 2:(m+1)) {
       ewt_time <- ewt_time - new_dist_state1[event_num,j] * sum(dist_state0[(1:(event_num-1)),j]) * (unique_event_times[j+1]-unique_event_times[j])
+      components[event_num-1] <- components[event_num-1] - new_dist_state1[event_num,j] * sum(dist_state0[(1:(event_num-1)),j]) * (unique_event_times[j+1]-unique_event_times[j])
     }
     j=j+1
   }
@@ -119,5 +124,5 @@ EWT <- function(m,dist_state0,dist_state1,unique_event_times0,unique_event_times
   #    cat('-------------------------------------','\n')
   #    cat('Final ewt_time=',ewt_time,'\n')
   #    cat('-------------------------------------','\n')
-  return(ewt_time)
+  return(list(ewt_time,components))
 }

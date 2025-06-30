@@ -66,7 +66,7 @@ print(cov)
 
 ## wintime Function
 
-The required arguments for the `wintime` function are the desired win time method, a matrix of event times, a matrix of event indicators, and a vector of treatment arm indicators. The win time method is entered as a string value indicating which method will be run. Methods include: `wtr`, `rwtr`, `pwt`, `ewtr`, `ewt`, `max`, and `rmt`. This section will demonstrate the use of each method with default settings. Each of these function calls will return a list with seven elements: the observed treatment effect, a vector of resampled treatment effects (this will be empty with no resampling), a message describing which method was used, the variance, the p-value, the number of wins for treatment (pairwise methods only), and the number of losses for treatment (pairwise methods only).    
+The required arguments for the `wintime` function are the desired win time method, a matrix of event times, a matrix of event indicators, and a vector of treatment arm indicators. The win time method is entered as a string value indicating which method will be run. Methods include: `wtr`, `rwtr`, `pwt`, `ewtr`, `ewt`, `max`, `rmt`, 'ewtp', 'rewtp', 'ewtpr', 'rewtpr', and 'rpwt'. This section will demonstrate the use of each method with default settings. Each of these function calls will return a list with nine elements: the observed treatment effect, a vector of resampled treatment effects (this will be empty with no resampling), a message describing which method was used, the variance, the p-value, the number of wins for treatment (pairwise methods only), the number of losses for treatment (pairwise methods only), a vector of length 'm' with the components of the treatment effect, and a vector of length 'm' with the variance of the components.  
 
 ### Win time ratio (wtr)
 ```{r - wtr}
@@ -114,10 +114,10 @@ print(result)
 
 ### Restricted mean survival in favor of treatment (rmt)
 
-For this method, the `rmst_restriction` argument must be passed. This is the cutoff time for the rmt method.
+For this method, the `time_restriction` argument must be passed. This is the cutoff time for the rmt method.
 ```{r - rmt}
 # Run rmt
-result <- wintime("rmt", Time, Delta, trt, rmst_restriction = round(1.5*365.25))
+result <- wintime("rmt", Time, Delta, trt, time_restriction = round(1.5*365.25))
 print(result)
 ```
 
@@ -225,6 +225,31 @@ print(max_follow0)
 max_follow1 <- result[[8]]
 cat("max_follow1 =", "\n")
 print(max_follow1)
+
+# Combined arm probabilities
+dist2 <- result[[9]]
+cat("dist2 =", "\n")
+print(dist2)
+
+# Unique combined arm event times
+untimes2 <- result[[10]]
+cat("untimes2 =", "\n")
+print(untimes2)
+
+# Number of unique combined arm event times
+nuntimes2 <- result[[11]]
+cat("nuntimes2 =", "\n")
+print(nuntimes2)
+
+# Combined arm max follow time
+max_follow2 <- result[[12]]
+cat("max_follow2 =", "\n")
+print(max_follow2)
+
+# Combined arm transition probabilities
+trans_prob2 <- result[[13]]
+cat("trans_prob2 =", "\n")
+print(trans_prob2)
 ```
 
 ### km Function
@@ -271,4 +296,29 @@ print(max_follow0)
 max_follow1 <- result[[8]]
 cat("max_follow1 =", "\n")
 print(max_follow1)
+
+# Combined arm probabilities
+dist2 <- result[[9]]
+cat("dist2 =", "\n")
+print(dist2)
+
+# Unique combined arm event times
+untimes2 <- result[[10]]
+cat("untimes2 =", "\n")
+print(untimes2)
+
+# Number of unique combined arm event times
+nuntimes2 <- result[[11]]
+cat("nuntimes2 =", "\n")
+print(nuntimes2)
+
+# Combined arm max follow time
+max_follow2 <- result[[12]]
+cat("max_follow2 =", "\n")
+print(max_follow2)
+
+# Combined arm KM
+comkm <- result[[13]]
+cat("comkm =", "\n")
+print(comkm)
 ```

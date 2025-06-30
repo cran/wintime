@@ -1,11 +1,11 @@
 #' Resample using bootstraps
 #'
 #' This function reruns the desired wintime package method on a given number of bootstrap samples. This resampling method is recommended
-#' for all pairwise wintime methods including Win time ratio (WTR), Restricted win time ratio (RWTR), and Pairwise win time (PWT). This
-#' function is also recommended for the EWTR_composite max test (MAX).
+#' for all pairwise wintime methods including Win time ratio (WTR), Restricted win time ratio (RWTR), Pairwise win time (PWT), and
+#' Restricted Pairwise win time (RPWT). This function is also recommended for the EWTR_composite max test (MAX).
 #'
 #' @param type A string value indicating the wintime package method that will run with resampling.
-#' @param rmst_restriction The RMT cutoff value (days).
+#' @param time_restriction The time cutoff value (days).
 #' @param model A string value indicating the model used on observed data ('markov' or 'km').
 #' @param n The total number of trial participants.
 #' @param m The number of events in the hierarchy.
@@ -20,14 +20,18 @@
 #' @param z_comp The Z-statistic of the composite event approach.
 #' @param resample_num The number of desired bootstraps.
 #' @param seed The seed used for random number generation.
-#' @return A vector of length resample_num containing the calculated treatment effect estimates (for type='max' these are z-statistics) for each bootstrap.
+#' @param nimp The number of random imputations for Redistribution-to-the-right.
+#' @return A list of a vector of length resample_num containing the calculated treatment effect estimates (for type='max' these are z-statistics) for each bootstrap,
+#' a m x resample_num matrix of the components of the treatment effect.
 
 # ---------------------------
 # Bootstrap
 # ---------------------------
-bootstrap <- function(type,rmst_restriction,model,n,m,Time,Delta,trt,cov,z_ewtr,z_comp,resample_num,seed) {
+bootstrap <- function(type,time_restriction,model,n,m,Time,Delta,trt,cov,z_ewtr,z_comp,resample_num,seed,nimp) {
   # Initialize vector to hold bootstrap values
   y <- rep(0,times = resample_num)
+  components <- matrix(0,nrow=m,ncol=resample_num)
+
 
   time <- Time[m:1, ]
   delta <- Delta[m:1, ]
@@ -90,17 +94,71 @@ bootstrap <- function(type,rmst_restriction,model,n,m,Time,Delta,trt,cov,z_ewtr,
       nuntimes1_boot <- z[[6]]
       max_follow0_boot <- z[[7]]
       max_follow1_boot <- z[[8]]
+      dist_state2_boot <- z[[9]]
+      untimes2_boot <- z[[10]]
+      nuntimes2_boot <- z[[11]]
+      max_follow2_boot <- z[[12]]
+      if (model == "km") {
+        comkm_boot <- z[[13]]
+        trtkm_boot <- z[[14]]
+        conkm_boot <- z[[15]]
+        trans_prob2_boot <- array(data=0,dim=c(m,m,nuntimes2_boot))
+        trans_prob1_boot <- array(data=0,dim=c(m,m,nuntimes1_boot))
+        trans_prob0_boot <- array(data=0,dim=c(m,m,nuntimes0_boot))
+      }
+      if (model == "markov") {
+        trans_prob2_boot <- z[[13]]
+        trans_prob1_boot <- z[[14]]
+        trans_prob0_boot <- z[[15]]
+        comkm_boot <- array(data=0,dim=c(m,nuntimes2_boot))
+        trtkm_boot <- array(data=0,dim=c(m,nuntimes1_boot))
+        conkm_boot <- array(data=0,dim=c(m,nuntimes0_boot))
+      }
     }
 
     # Type function calls
     if (type == "ewt") {
-      y[iboot] <- EWT(m,dist_state0_boot,dist_state1_boot,untimes0_boot,untimes1_boot,nuntimes0_boot,nuntimes1_boot)
+      temp <- EWT(m,dist_state0_boot,dist_state1_boot,untimes0_boot,untimes1_boot,nuntimes0_boot,nuntimes1_boot)
+      y[iboot] <- temp[[1]]
+      components[,iboot] <- temp[[2]]
     }
     else if (type == "ewtr") {
-      y[iboot] <- EWTR(n,m,nuntimes0_boot,max_follow0_boot,untimes0_boot,Time_boot,Delta_boot,dist_state0_boot,markov_ind,cov_boot,trt_boot)[[1]]
+      temp <- EWTR(n,m,nuntimes0_boot,max_follow0_boot,untimes0_boot,Time_boot,Delta_boot,dist_state0_boot,markov_ind,cov_boot,trt_boot)
+      y[iboot] <- temp[[1]]
+      components[,iboot] <- temp[[4]]
+    }
+    else if (type == "ewtp") {
+      temp <- EWTP(n,m,nuntimes2_boot,max_follow2_boot,untimes2_boot,Time_boot,Delta_boot,dist_state2_boot,markov_ind,cov_boot,trt_boot)
+      y[iboot] <- temp[[1]]
+      components[,iboot] <- temp[[4]]
+#      cat('resampled components for iboot=',iboot,'\n')
+#      print(components[,iboot])
+    }
+    else if (type == "rewtp") {
+      temp <- REWTP(n,m,nuntimes2_boot,max_follow2_boot,untimes2_boot,Time_boot,Delta_boot,dist_state2_boot,markov_ind,cov_boot,trt_boot,time_restriction)
+      y[iboot] <- temp[[1]]
+      components[,iboot] <- temp[[4]]
+      #      cat('resampled components for iboot=',iboot,'\n')
+      #      print(components[,iboot])
+    }
+    else if (type == "ewtpr") {
+      temp <- EWTPR(n,m,nuntimes2_boot,max_follow2_boot,untimes2_boot,Time_boot,Delta_boot,dist_state2_boot,markov_ind,cov_boot,trt_boot,comkm_boot,trans_prob2_boot,nuntimes1_boot,max_follow1_boot,untimes1_boot,dist_state1_boot,trtkm_boot,trans_prob1_boot,nuntimes0_boot,max_follow0_boot,untimes0_boot,dist_state0_boot,conkm_boot,trans_prob0_boot,nimp)
+      y[iboot] <- temp[[1]]
+      components[,iboot] <- temp[[4]]
+      #      cat('resampled components for iboot=',iboot,'\n')
+      #      print(components[,iboot])
+    }
+    else if (type == "rewtpr") {
+      temp <- REWTPR(n,m,nuntimes2_boot,max_follow2_boot,untimes2_boot,Time_boot,Delta_boot,dist_state2_boot,markov_ind,cov_boot,trt_boot,comkm_boot,trans_prob2_boot,time_restriction,nuntimes1_boot,max_follow1_boot,untimes1_boot,dist_state1_boot,trtkm_boot,trans_prob1_boot,nuntimes0_boot,max_follow0_boot,untimes0_boot,dist_state0_boot,conkm_boot,trans_prob0_boot,nimp)
+      y[iboot] <- temp[[1]]
+      components[,iboot] <- temp[[4]]
+      #      cat('resampled components for iboot=',iboot,'\n')
+      #      print(components[,iboot])
     }
     else if (type == "rmt") {
-      y[iboot] <- RMT(m,rmst_restriction,dist_state0_boot,dist_state1_boot,untimes0_boot,untimes1_boot,nuntimes0_boot,nuntimes1_boot)
+      temp <- RMT(m,time_restriction,dist_state0_boot,dist_state1_boot,untimes0_boot,untimes1_boot,nuntimes0_boot,nuntimes1_boot)
+      y[iboot] <- temp[[1]]
+      components[,iboot] <- temp[[2]]
     }
     else if (type == "wtr") {
       y[iboot] <- WTR(n,m,tau,trt_boot,Time_boot,Delta_boot)[[1]]
@@ -111,7 +169,14 @@ bootstrap <- function(type,rmst_restriction,model,n,m,Time,Delta,trt,cov,z_ewtr,
       y[iboot] <- RWTR(n,m,tau,trt_boot,Time_boot,Delta_boot)[[1]]
     }
     else if (type == "pwt") {
-      y[iboot] <- PWT(n,n0,n1,m,Time_boot,Delta_boot,trt_boot,tau)
+      temp <- PWT(n,n0,n1,m,Time_boot,Delta_boot,trt_boot,tau)
+      y[iboot] <- temp[[1]]
+      components[,iboot] <- temp[[2]]
+    }
+    else if (type == "rpwt") {
+      temp <- RPWT(n,n0,n1,m,Time_boot,Delta_boot,trt_boot,tau,time_restriction)
+      y[iboot] <- temp[[1]]
+      components[,iboot] <- temp[[2]]
     }
     else if (type == "max") {
       # Observed Z statistic
@@ -127,9 +192,12 @@ bootstrap <- function(type,rmst_restriction,model,n,m,Time,Delta,trt,cov,z_ewtr,
       y[iboot] <- max((z_ewtr_boot - z_ewtr),(z_comp_boot - z_comp))
     }
     else {
-      stop(paste("Invalid type:", type, "- Please specify one of 'ewt', 'ewtr', 'rmt', 'wtr', 'rwtr', 'pwt', 'max'"))
+      stop(paste("Invalid type:", type, "- Please specify one of 'ewt', 'ewtr', 'rmt', 'wtr', 'rwtr', 'pwt', 'ewtp', 'rewtp', 'ewtpr', 'rewtpr' ,'rpwt', 'max'"))
     }
     iboot <- iboot + 1
   }
-  return(y)
+#  cat('resampled components=','\n')
+#  print(components)
+
+  return(list(y,components))
 }

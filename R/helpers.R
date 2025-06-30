@@ -10,13 +10,14 @@
 #' @param time1 A vector containing the treatment person's event times (days).
 #' @param delta0 A vector containing the control person's event indicators.
 #' @param delta1 A vector containing the treatment person's event indicators.
-#' @return The win time difference integral.
+#' @return A list of the win time difference integral and its components.
 
 # --------------------------------
 # Helper functions
 # --------------------------------
 getWintimeIntegral <- function(m,etimes,time0,time1,delta0,delta1) {
   integral <- 0
+  components <- rep(0,m)
   # Iterate through event times and calculate integral
   for (k in 2:length(etimes)) {
     if (etimes[k] != etimes[k-1]) {
@@ -24,11 +25,13 @@ getWintimeIntegral <- function(m,etimes,time0,time1,delta0,delta1) {
         if (time0[event] <= etimes[k-1] && time1[event] > etimes[k-1]) {
           # Treatment person wins
           integral <- integral + etimes[k] - etimes[k-1]
+          components[event] <- components[event] + etimes[k] - etimes[k-1]
           break
         }
         else if (time1[event] <= etimes[k-1] && time0[event] > etimes[k-1]) {
           # Treatment person loses
           integral <- integral - etimes[k] + etimes[k-1]
+          components[event] <- components[event] - etimes[k] + etimes[k-1]
           break
         }
         # If there is a tie
@@ -46,6 +49,7 @@ getWintimeIntegral <- function(m,etimes,time0,time1,delta0,delta1) {
     if (time0[event] == etimes[length(etimes)] && time1[event] == etimes[length(etimes)]
         && delta0[event] == 1 && delta1[event] == 0) {
       integral <- integral + 1
+      components[event] <- components[event] + 1
       break
     }
     # If both the control and the treatment person have an event time equal to the last day
@@ -53,11 +57,100 @@ getWintimeIntegral <- function(m,etimes,time0,time1,delta0,delta1) {
     if (time0[event] == etimes[length(etimes)] && time1[event] == etimes[length(etimes)]
         && delta0[event] == 0 && delta1[event] == 1) {
       integral <- integral - 1
+      components[event] <- components[event] - 1
       break
     }
   }
-  return(integral)
+  return(list(integral,components))
 }
+
+
+
+#' Win time difference with time restriction
+#'
+#' This function calculates the win time difference integral for a single pair with truncation at time_restriction.
+#' This function is used in all pairwise win time methods.
+#'
+#' @param m The number of events in the hierarchy.
+#' @param etimes A sorted vector of event times (days) (returned from wintime::setEventTimes()).
+#' @param time0 A vector containing the control person's event times (days).
+#' @param time1 A vector containing the treatment person's event times (days).
+#' @param delta0 A vector containing the control person's event indicators.
+#' @param delta1 A vector containing the treatment person's event indicators.
+#' @param time_restriction The time restriction (days) for calculation.
+#' @return A list of the win time difference integral and its components.
+
+# -------------------------------------------
+# Win time difference with time restriction
+# -------------------------------------------
+getWintimeIntegral_rest <- function(m,etimes,time0,time1,delta0,delta1,time_restriction) {
+  integral <- 0
+  components <- rep(0,m)
+  # Iterate through event times and calculate integral
+  for (k in 2:length(etimes)) {
+    if (etimes[k] != etimes[k-1]) {
+      for (event in m:1) {
+        if (time0[event] <= etimes[k-1] && time1[event] > etimes[k-1]) {
+          # Treatment person wins
+          if (etimes[k-1] >= time_restriction) {
+            time_inc=0
+          } else {
+            if (etimes[k] >= time_restriction) {
+              time_inc=time_restriction-etimes[k-1]
+            } else {
+              time_inc=etimes[k]-etimes[k-1]
+            }
+          }
+          integral <- integral + time_inc
+          components[event] <- components[event] + time_inc
+          break
+        }
+        else if (time1[event] <= etimes[k-1] && time0[event] > etimes[k-1]) {
+          # Treatment person loses
+          if (etimes[k-1] >= time_restriction) {
+            time_inc=0
+          } else {
+            if (etimes[k] >= time_restriction) {
+              time_inc=time_restriction-etimes[k-1]
+            } else {
+              time_inc=etimes[k]-etimes[k-1]
+            }
+          }
+          integral <- integral - time_inc
+          components[event] <- components[event] - time_inc
+          break
+        }
+        # If there is a tie
+        else if (time1[event] <= etimes[k-1] && time0[event] <= etimes[k-1]) {
+          break
+        }
+      }
+    }
+  }
+
+  # If an event is observed on the last day, update the integral value to reflect it
+  for (event in m:1) {
+    # If both the control and the treatment person have an event time equal to the last day
+    # and the control person has an event while the treatment person does not
+    if (time0[event] == etimes[length(etimes)] && time1[event] == etimes[length(etimes)]
+        && delta0[event] == 1 && delta1[event] == 0) {
+      integral <- integral + 1
+      components[event] <- components[event] + 1
+      break
+    }
+    # If both the control and the treatment person have an event time equal to the last day
+    # and the control person does not have an event while the treatment person does
+    if (time0[event] == etimes[length(etimes)] && time1[event] == etimes[length(etimes)]
+        && delta0[event] == 0 && delta1[event] == 1) {
+      integral <- integral - 1
+      components[event] <- components[event] - 1
+      break
+    }
+  }
+  return(list(integral,components))
+}
+
+
 
 #' Set event times and indicators used in the Kaplan-Meier survival curve calculation
 #'

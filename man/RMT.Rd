@@ -6,7 +6,7 @@
 \usage{
 RMT(
   m,
-  rmst_restriction,
+  time_restriction,
   dist_state0,
   dist_state1,
   unique_event_times0,
@@ -18,7 +18,7 @@ RMT(
 \arguments{
 \item{m}{The number of events in the hierarchy.}
 
-\item{rmst_restriction}{The cutoff time point (days) for the calculation.}
+\item{time_restriction}{The cutoff time point (days) for the calculation.}
 
 \item{dist_state0}{A matrix of control arm state probabilities (returned from wintime::km() or wintime::markov()).}
 
@@ -33,7 +33,7 @@ RMT(
 \item{nunique_event_times1}{The number of unique treatment arm event times (returned from wintime::km() or wintime::markov()).}
 }
 \value{
-The restricted mean survival in favor of the treatment arm.
+A list containing: The restricted mean survival in favor of the treatment arm, the components of the treatment effect.
 }
 \description{
 Calculates the state space probabilities using a Kaplan-Meier model (recommended) or a Markov model. This function uses these probabilities

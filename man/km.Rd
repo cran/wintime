@@ -23,7 +23,9 @@ in increasing order of clinical severity.}
 A list containing: a matrix of control arm state probabilities, a matrix of treatment arm state probabilities,
 a vector of unique control arm event times (days), a vector of unique treatment arm event times (days), the number of unique control
 arm event times, the number of unique treatment arm event times, the control arm max follow time (days), the treatment arm
-max follow time (days).
+max follow time (days), a matrix of combined arm state probabilities, a vector of unique combined arm event times (days),
+the number of unique combined arm event times, the combined arm max follow time (days), a (m x number unique combined arm event times)
+matrix of combined arm km survival probabilities, matrix of trt arm km survival probabilities, matrix of control arm km survival probabilities.
 }
 \description{
 This function fits Kaplan-Meier models to calculate the state probabilities for each arm. In the wintime package, the returned state probability

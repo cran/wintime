@@ -13,12 +13,13 @@ wintime(
   model = NULL,
   resample = NULL,
   resample_num = 0,
-  rmst_restriction = NA,
-  seed = NA
+  time_restriction = NA,
+  seed = NA,
+  nimp = 0
 )
 }
 \arguments{
-\item{type}{A string value indicating the desired win time method. Methods include 'ewt', 'ewtr', 'rmt', 'max', 'wtr', 'rwtr', and 'pwt'.}
+\item{type}{A string value indicating the desired win time method. Methods include 'ewt', 'ewtr', 'rmt', 'max', 'wtr', 'rwtr', 'pwt', 'ewtp', 'rewtp', 'ewtpr','rewtpr', and 'rpwt'.}
 
 \item{Time}{A \verb{m x n} matrix of event times (days), where \code{m} is the number of events in the hierarchy, and \code{n} is the total number of trial participants.
 Rows should represent events and columns should represent participants. Event rows should be in increasing order of clinical severity.}
@@ -37,18 +38,36 @@ Rows should represent participants and columns should represent covariate values
 
 \item{resample_num}{Optional. The number of desired resamples. Default is 0.}
 
-\item{rmst_restriction}{Required only for \code{type} = 'rmt'. The RMT cutoff time (days).}
+\item{time_restriction}{Required only for \code{type} = 'rmt','rewtp','rewtpr', and 'rpwt'. The cutoff time (days).}
 
 \item{seed}{Optional. Seed used for random number generation in resampling.}
+
+\item{nimp}{Required only for \code{type} = 'ewtpr','rewtpr'. The number of random imputations for Redistribution-to-the-right.}
 }
 \value{
 A list containing: the observed treatment effect, a vector of length \code{resample_num} containing resampled treatment effects, a message
 indicating the method ran and the type of resampling done, the variance, the p-value, the total wins on treatment (pairwise methods only),
-the total losses on treatment (pairwise methods only). A warning message will be printed for combinations of \code{type} and \code{model}/\code{resample}
+the total losses on treatment (pairwise methods only), a vector of length 'm' with the components of the treatment effect,
+a vector of length 'm' with the variance of the components. A warning message will be printed for combinations of \code{type} and \code{model}/\code{resample}
 that are not recommended.
 }
 \description{
 This function runs one of the win time methods on observed and resampled data.
+}
+\details{
+The type parameter specifies the procedure you would like to run.
+'ewt' is Expected Win Time.
+'ewtr' is Expected Win Time Against Reference (Control Arm).
+'rmt' is Restricted Mean Time in Favor of Treatment.
+'max' is the MAX procedure (max(COMP,EWTR)).
+'wtr' is Win Time Ratio.
+'rwtr' is Restricted Win Time Ratio.
+'pwt' is Pairwise Win Time.
+'ewtp' is Expected Win Time Against Trial Population.
+'ewtpr' is Expected Win Time Against Trial Population With Redistribution.
+'rewtp' is Time Restricted Expected Win Time Against Trial Population.
+'rewtpr'is Time Restricted Expected Win Time Against Trial Population With Redistribution.
+'rpwt' is Time Restricted Pairwise Win Time.
 }
 \examples{
 # ------------------------------

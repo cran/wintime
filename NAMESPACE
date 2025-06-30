@@ -4,7 +4,7 @@
 importFrom(survival, coxph)
 importFrom(survival, survfit)
 importFrom(survival, Surv)
-importFrom("stats", "coef", "lm", "pnorm", "sd", "vcov")
+importFrom("stats", "coef", "lm", "pnorm", "sd", "vcov", "runif", "var")
 
 # --------------------
 # Exports

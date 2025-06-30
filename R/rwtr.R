@@ -67,7 +67,8 @@ RWTR <- function(n,m,tau,tg,Time,Delta) {
           delta1 <- Delta[1:m,i]
 
           order <- setEventTimes(m,delta0,delta1,time0,time1,follow)
-          integral <- getWintimeIntegral(m,order,time0,time1,delta0,delta1)
+          temp <- getWintimeIntegral(m,order,time0,time1,delta0,delta1)
+          integral <- temp[[1]]
 
           if (integral > 0)
           {

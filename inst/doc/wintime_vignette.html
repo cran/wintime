@@ -453,14 +453,17 @@ desired win time method, a matrix of event times, a matrix of event
 indicators, and a vector of treatment arm indicators. The win time
 method is entered as a string value indicating which method will be run.
 Methods include: <code>wtr</code>, <code>rwtr</code>, <code>pwt</code>,
-<code>ewtr</code>, <code>ewt</code>, <code>max</code>, and
-<code>rmt</code>. This section will demonstrate the use of each method
-with default settings. Each of these function calls will return a list
-with seven elements: the observed treatment effect, a vector of
-resampled treatment effects (this will be empty with no resampling), a
-message describing which method was used, the variance, the p-value, the
-number of wins for treatment (pairwise methods only), and the number of
-losses for treatment (pairwise methods only).</p>
+<code>ewtr</code>, <code>ewt</code>, <code>max</code>, <code>rmt</code>,
+‘ewtp’, ‘rewtp’, ‘ewtpr’, ‘rewtpr’, and ‘rpwt’. This section will
+demonstrate the use of each method with default settings. Each of these
+function calls will return a list with nine elements: the observed
+treatment effect, a vector of resampled treatment effects (this will be
+empty with no resampling), a message describing which method was used,
+the variance, the p-value, the number of wins for treatment (pairwise
+methods only), the number of losses for treatment (pairwise methods
+only), a vector of length ‘m’ with the components of the treatment
+effect, and a vector of length ‘m’ with the variance of the
+components.</p>
 <div id="win-time-ratio-wtr" class="section level3">
 <h3>Win time ratio (wtr)</h3>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="co"># Run wtr</span></span>
@@ -485,7 +488,13 @@ losses for treatment (pairwise methods only).</p>
 ## [1] 9
 ## 
 ## $losses
-## [1] 9</code></pre>
+## [1] 9
+## 
+## $components
+## [1] NA NA NA
+## 
+## $components_var
+## [1] NA NA NA</code></pre>
 </div>
 <div id="restricted-win-time-ratio-rwtr" class="section level3">
 <h3>Restricted win time ratio (rwtr)</h3>
@@ -511,7 +520,13 @@ losses for treatment (pairwise methods only).</p>
 ## [1] 9
 ## 
 ## $losses
-## [1] 9</code></pre>
+## [1] 9
+## 
+## $components
+## [1] NA NA NA
+## 
+## $components_var
+## [1] NA NA NA</code></pre>
 </div>
 <div id="pairwise-win-time-pwt" class="section level3">
 <h3>Pairwise win time (pwt)</h3>
@@ -519,8 +534,7 @@ losses for treatment (pairwise methods only).</p>
 <span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">wintime</span>(<span class="st">&quot;pwt&quot;</span>, Time, Delta, trt)</span>
 <span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a><span class="fu">print</span>(result)</span></code></pre></div>
 <pre><code>## $data
-## TIME_1 
-##   1.36 
+## [1] 1.36
 ## 
 ## $resample_data
 ## numeric(0)
@@ -532,14 +546,19 @@ losses for treatment (pairwise methods only).</p>
 ## [1] NA
 ## 
 ## $p
-## TIME_1 
-##     NA 
+## [1] NA
 ## 
 ## $wins
 ## [1] NA
 ## 
 ## $losses
-## [1] NA</code></pre>
+## [1] NA
+## 
+## $components
+## [1]  2.56 -1.20  0.00
+## 
+## $components_var
+## [1] NA NA NA</code></pre>
 </div>
 <div id="expected-win-time-against-reference-ewtr" class="section level3">
 <h3>Expected win time against reference (ewtr)</h3>
@@ -570,7 +589,13 @@ argument. If you wish to enter covariates, pass it as the value of
 ## [1] NA
 ## 
 ## $losses
-## [1] NA</code></pre>
+## [1] NA
+## 
+## $components
+## [1] -52.66535 -98.28383   0.00000
+## 
+## $components_var
+## [1]   936.7131 11528.9055     0.0000</code></pre>
 </div>
 <div id="expected-win-time-ewt" class="section level3">
 <h3>Expected win time (ewt)</h3>
@@ -596,7 +621,13 @@ argument. If you wish to enter covariates, pass it as the value of
 ## [1] NA
 ## 
 ## $losses
-## [1] NA</code></pre>
+## [1] NA
+## 
+## $components
+## [1] -14.82917  -4.62500 -18.00000
+## 
+## $components_var
+## [1] NA NA NA</code></pre>
 </div>
 <div id="ewtr-composite-max-test-max" class="section level3">
 <h3>EWTR-composite max test (max)</h3>
@@ -622,14 +653,20 @@ argument. If you wish to enter covariates, pass it as the value of
 ## [1] NA
 ## 
 ## $losses
-## [1] NA</code></pre>
+## [1] NA
+## 
+## $components
+## [1] NA NA NA
+## 
+## $components_var
+## [1] NA NA NA</code></pre>
 </div>
 <div id="restricted-mean-survival-in-favor-of-treatment-rmt" class="section level3">
 <h3>Restricted mean survival in favor of treatment (rmt)</h3>
-<p>For this method, the <code>rmst_restriction</code> argument must be
+<p>For this method, the <code>time_restriction</code> argument must be
 passed. This is the cutoff time for the rmt method.</p>
 <div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a><span class="co"># Run rmt</span></span>
-<span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">wintime</span>(<span class="st">&quot;rmt&quot;</span>, Time, Delta, trt, <span class="at">rmst_restriction =</span> <span class="fu">round</span>(<span class="fl">1.5</span><span class="sc">*</span><span class="fl">365.25</span>))</span>
+<span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">wintime</span>(<span class="st">&quot;rmt&quot;</span>, Time, Delta, trt, <span class="at">time_restriction =</span> <span class="fu">round</span>(<span class="fl">1.5</span><span class="sc">*</span><span class="fl">365.25</span>))</span>
 <span id="cb30-3"><a href="#cb30-3" tabindex="-1"></a><span class="fu">print</span>(result)</span></code></pre></div>
 <pre><code>## $data
 ## [1] -37.45417
@@ -650,7 +687,13 @@ passed. This is the cutoff time for the rmt method.</p>
 ## [1] NA
 ## 
 ## $losses
-## [1] NA</code></pre>
+## [1] NA
+## 
+## $components
+## [1] -14.82917  -4.62500 -18.00000
+## 
+## $components_var
+## [1] NA NA NA</code></pre>
 </div>
 </div>
 <div id="resampling" class="section level2">
@@ -689,7 +732,13 @@ argument for replicability.</p>
 ## [1] NA
 ## 
 ## $losses
-## [1] NA</code></pre>
+## [1] NA
+## 
+## $components
+## [1] -14.82917  -4.62500 -18.00000
+## 
+## $components_var
+## [1] 769.1744 126.2272  99.6000</code></pre>
 </div>
 <div id="wtr-with-5-resamples" class="section level3">
 <h3>wtr with 5 Resamples</h3>
@@ -718,7 +767,13 @@ complete execution.</p>
 ## [1] 9
 ## 
 ## $losses
-## [1] 9</code></pre>
+## [1] 9
+## 
+## $components
+## [1] NA NA NA
+## 
+## $components_var
+## [1] NA NA NA</code></pre>
 </div>
 </div>
 <div id="resampleing-cont." class="section level2">
@@ -756,7 +811,13 @@ do so by passing “boot” as the value for <code>resample</code>.</p>
 ## [1] NA
 ## 
 ## $losses
-## [1] NA</code></pre>
+## [1] NA
+## 
+## $components
+## [1] -14.82917  -4.62500 -18.00000
+## 
+## $components_var
+## [1] 520.8137 278.2333  86.4000</code></pre>
 </div>
 <div id="survival-models" class="section level2">
 <h2>Survival Models</h2>
@@ -800,7 +861,13 @@ model, we can do so by passing “km” as the value for
 ## [1] NA
 ## 
 ## $losses
-## [1] NA</code></pre>
+## [1] NA
+## 
+## $components
+## [1] -57.38148 -50.71252   0.00000
+## 
+## $components_var
+## [1] 1441.037 8496.971    0.000</code></pre>
 </div>
 <div id="model-functions" class="section level2">
 <h2>Model Functions</h2>
@@ -895,27 +962,177 @@ parameters. This is also defined in the ‘Example Data’ section.</p>
 <pre><code>## max_follow1 =</code></pre>
 <div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" tabindex="-1"></a><span class="fu">print</span>(max_follow1)</span></code></pre></div>
 <pre><code>## [1] 380</code></pre>
+<div class="sourceCode" id="cb77"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" tabindex="-1"></a><span class="co"># Combined arm probabilities</span></span>
+<span id="cb77-2"><a href="#cb77-2" tabindex="-1"></a>dist2 <span class="ot">&lt;-</span> result[[<span class="dv">9</span>]]</span>
+<span id="cb77-3"><a href="#cb77-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;dist2 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## dist2 =</code></pre>
+<div class="sourceCode" id="cb79"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" tabindex="-1"></a><span class="fu">print</span>(dist2)</span></code></pre></div>
+<pre><code>##      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13] [,14]
+## [1,]  0.9  0.7  0.7  0.7 0.56 0.56 0.56 0.42 0.42  0.28  0.28  0.28  0.28  0.28
+## [2,]  0.1  0.3  0.3  0.3 0.30 0.30 0.30 0.44 0.44  0.44  0.00  0.00  0.00  0.00
+## [3,]  0.0  0.0  0.0  0.0 0.14 0.14 0.14 0.14 0.14  0.28  0.72  0.72  0.72  0.72
+## [4,]  0.0  0.0  0.0  0.0 0.00 0.00 0.00 0.00 0.00  0.00  0.00  0.00  0.00  0.00
+##      [,15] [,16]
+## [1,]  0.28  0.28
+## [2,]  0.00  0.00
+## [3,]  0.72  0.72
+## [4,]  0.00  0.00</code></pre>
+<div class="sourceCode" id="cb81"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" tabindex="-1"></a><span class="co"># Unique combined arm event times</span></span>
+<span id="cb81-2"><a href="#cb81-2" tabindex="-1"></a>untimes2 <span class="ot">&lt;-</span> result[[<span class="dv">10</span>]]</span>
+<span id="cb81-3"><a href="#cb81-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;untimes2 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## untimes2 =</code></pre>
+<div class="sourceCode" id="cb83"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" tabindex="-1"></a><span class="fu">print</span>(untimes2)</span></code></pre></div>
+<pre><code>##  [1]   11   29   33   44   66   69   95  102  117  128  153  186  270  380  435
+## [16] 1063</code></pre>
+<div class="sourceCode" id="cb85"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" tabindex="-1"></a><span class="co"># Number of unique combined arm event times</span></span>
+<span id="cb85-2"><a href="#cb85-2" tabindex="-1"></a>nuntimes2 <span class="ot">&lt;-</span> result[[<span class="dv">11</span>]]</span>
+<span id="cb85-3"><a href="#cb85-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;nuntimes2 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## nuntimes2 =</code></pre>
+<div class="sourceCode" id="cb87"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" tabindex="-1"></a><span class="fu">print</span>(nuntimes2)</span></code></pre></div>
+<pre><code>## [1] 16</code></pre>
+<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" tabindex="-1"></a><span class="co"># Combined arm max follow time</span></span>
+<span id="cb89-2"><a href="#cb89-2" tabindex="-1"></a>max_follow2 <span class="ot">&lt;-</span> result[[<span class="dv">12</span>]]</span>
+<span id="cb89-3"><a href="#cb89-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;max_follow2 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## max_follow2 =</code></pre>
+<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" tabindex="-1"></a><span class="fu">print</span>(max_follow2)</span></code></pre></div>
+<pre><code>## [1] 380</code></pre>
+<div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" tabindex="-1"></a><span class="co"># Combined arm transition probabilities</span></span>
+<span id="cb93-2"><a href="#cb93-2" tabindex="-1"></a>trans_prob2 <span class="ot">&lt;-</span> result[[<span class="dv">13</span>]]</span>
+<span id="cb93-3"><a href="#cb93-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;trans_prob2 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## trans_prob2 =</code></pre>
+<div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" tabindex="-1"></a><span class="fu">print</span>(trans_prob2)</span></code></pre></div>
+<pre><code>## , , 1
+## 
+##      [,1] [,2] [,3]
+## [1,]  0.1    0    0
+## [2,] -1.0   -1   -1
+## [3,] -1.0   -1   -1
+## 
+## , , 2
+## 
+##            [,1] [,2] [,3]
+## [1,]  0.2222222    0    0
+## [2,]  0.0000000    0    0
+## [3,] -1.0000000   -1   -1
+## 
+## , , 3
+## 
+##      [,1] [,2] [,3]
+## [1,]    0    0    0
+## [2,]    0    0    0
+## [3,]   -1   -1   -1
+## 
+## , , 4
+## 
+##      [,1] [,2] [,3]
+## [1,]    0    0    0
+## [2,]    0    0    0
+## [3,]   -1   -1   -1
+## 
+## , , 5
+## 
+##      [,1] [,2] [,3]
+## [1,]    0  0.2    0
+## [2,]    0  0.0    0
+## [3,]   -1 -1.0   -1
+## 
+## , , 6
+## 
+##      [,1] [,2] [,3]
+## [1,]    0    0    0
+## [2,]    0    0    0
+## [3,]    0    0    0
+## 
+## , , 7
+## 
+##      [,1] [,2] [,3]
+## [1,]    0    0    0
+## [2,]    0    0    0
+## [3,]    0    0    0
+## 
+## , , 8
+## 
+##      [,1] [,2] [,3]
+## [1,] 0.25    0    0
+## [2,] 0.00    0    0
+## [3,] 0.00    0    0
+## 
+## , , 9
+## 
+##      [,1] [,2] [,3]
+## [1,]    0    0    0
+## [2,]    0    0    0
+## [3,]    0    0    0
+## 
+## , , 10
+## 
+##      [,1]      [,2] [,3]
+## [1,]    0 0.3333333    0
+## [2,]    0 0.0000000    0
+## [3,]    0 0.0000000    0
+## 
+## , , 11
+## 
+##      [,1] [,2] [,3]
+## [1,]    0    0    0
+## [2,]    0    1    0
+## [3,]    0    0    0
+## 
+## , , 12
+## 
+##      [,1] [,2] [,3]
+## [1,]    0    0    0
+## [2,]   -1   -1   -1
+## [3,]    0    0    0
+## 
+## , , 13
+## 
+##      [,1] [,2] [,3]
+## [1,]    0    0    0
+## [2,]   -1   -1   -1
+## [3,]    0    0    0
+## 
+## , , 14
+## 
+##      [,1] [,2] [,3]
+## [1,]    0    0    0
+## [2,]   -1   -1   -1
+## [3,]    0    0    0
+## 
+## , , 15
+## 
+##      [,1] [,2] [,3]
+## [1,]   -1   -1   -1
+## [2,]   -1   -1   -1
+## [3,]    0    0    0
+## 
+## , , 16
+## 
+##      [,1] [,2] [,3]
+## [1,]   -1   -1   -1
+## [2,]   -1   -1   -1
+## [3,]    0    0    0</code></pre>
 </div>
 <div id="km-function" class="section level3">
 <h3>km Function</h3>
-<div class="sourceCode" id="cb77"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" tabindex="-1"></a><span class="co"># Run km</span></span>
-<span id="cb77-2"><a href="#cb77-2" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">km</span>(n0, n1, m, Time, Delta)</span>
-<span id="cb77-3"><a href="#cb77-3" tabindex="-1"></a></span>
-<span id="cb77-4"><a href="#cb77-4" tabindex="-1"></a><span class="co"># Control arm probabilities</span></span>
-<span id="cb77-5"><a href="#cb77-5" tabindex="-1"></a>dist0 <span class="ot">&lt;-</span> result[[<span class="dv">1</span>]]</span>
-<span id="cb77-6"><a href="#cb77-6" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;dist0 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb97"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb97-1"><a href="#cb97-1" tabindex="-1"></a><span class="co"># Run km</span></span>
+<span id="cb97-2"><a href="#cb97-2" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">km</span>(n0, n1, m, Time, Delta)</span>
+<span id="cb97-3"><a href="#cb97-3" tabindex="-1"></a></span>
+<span id="cb97-4"><a href="#cb97-4" tabindex="-1"></a><span class="co"># Control arm probabilities</span></span>
+<span id="cb97-5"><a href="#cb97-5" tabindex="-1"></a>dist0 <span class="ot">&lt;-</span> result[[<span class="dv">1</span>]]</span>
+<span id="cb97-6"><a href="#cb97-6" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;dist0 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
 <pre><code>## dist0 =</code></pre>
-<div class="sourceCode" id="cb79"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" tabindex="-1"></a><span class="fu">print</span>(dist0)</span></code></pre></div>
+<div class="sourceCode" id="cb99"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb99-1"><a href="#cb99-1" tabindex="-1"></a><span class="fu">print</span>(dist0)</span></code></pre></div>
 <pre><code>##      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13] [,14]
 ## [1,]  0.6  0.6  0.6  0.6  0.3  0.3    0    0    0     0     0     0     0     0
 ## [2,]  0.4  0.4  0.4  0.4  0.2  0.2    0    0    0     0     0     0     0     0
 ## [3,]  0.0  0.0  0.0  0.0  0.5  0.5    0    0    0     0     0     0     0     0
 ## [4,]  0.0  0.0  0.0  0.0  0.0  0.0    0    0    0     0     0     0     0     0</code></pre>
-<div class="sourceCode" id="cb81"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" tabindex="-1"></a><span class="co"># Treatment arm probabilities</span></span>
-<span id="cb81-2"><a href="#cb81-2" tabindex="-1"></a>dist1 <span class="ot">&lt;-</span> result[[<span class="dv">2</span>]]</span>
-<span id="cb81-3"><a href="#cb81-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;dist1 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb101"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1" tabindex="-1"></a><span class="co"># Treatment arm probabilities</span></span>
+<span id="cb101-2"><a href="#cb101-2" tabindex="-1"></a>dist1 <span class="ot">&lt;-</span> result[[<span class="dv">2</span>]]</span>
+<span id="cb101-3"><a href="#cb101-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;dist1 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
 <pre><code>## dist1 =</code></pre>
-<div class="sourceCode" id="cb83"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" tabindex="-1"></a><span class="fu">print</span>(dist1)</span></code></pre></div>
+<div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" tabindex="-1"></a><span class="fu">print</span>(dist1)</span></code></pre></div>
 <pre><code>##      [,1] [,2]      [,3]      [,4]      [,5]      [,6]      [,7]      [,8] [,9]
 ## [1,]  0.8  0.8 0.5333333 0.2666667 0.2666667 0.2666667 0.2666667 0.2666667    0
 ## [2,]  0.2  0.2 0.2166667 0.4833333 0.4833333 0.1083333 0.1083333 0.1083333    0
@@ -926,42 +1143,88 @@ parameters. This is also defined in the ‘Example Data’ section.</p>
 ## [2,]     0     0     0     0     0     0
 ## [3,]     0     0     0     0     0     0
 ## [4,]     0     0     0     0     0     0</code></pre>
-<div class="sourceCode" id="cb85"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" tabindex="-1"></a><span class="co"># Unique control arm event times</span></span>
-<span id="cb85-2"><a href="#cb85-2" tabindex="-1"></a>untimes0 <span class="ot">&lt;-</span> result[[<span class="dv">3</span>]]</span>
-<span id="cb85-3"><a href="#cb85-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;untimes0 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb105"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" tabindex="-1"></a><span class="co"># Unique control arm event times</span></span>
+<span id="cb105-2"><a href="#cb105-2" tabindex="-1"></a>untimes0 <span class="ot">&lt;-</span> result[[<span class="dv">3</span>]]</span>
+<span id="cb105-3"><a href="#cb105-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;untimes0 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
 <pre><code>## untimes0 =</code></pre>
-<div class="sourceCode" id="cb87"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" tabindex="-1"></a><span class="fu">print</span>(untimes0)</span></code></pre></div>
+<div class="sourceCode" id="cb107"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb107-1"><a href="#cb107-1" tabindex="-1"></a><span class="fu">print</span>(untimes0)</span></code></pre></div>
 <pre><code>## [1]  29  44  69  95 128 186</code></pre>
-<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" tabindex="-1"></a><span class="co"># Unique treatment arm event times</span></span>
-<span id="cb89-2"><a href="#cb89-2" tabindex="-1"></a>untimes1 <span class="ot">&lt;-</span> result[[<span class="dv">4</span>]]</span>
-<span id="cb89-3"><a href="#cb89-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;untimes1 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb109"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb109-1"><a href="#cb109-1" tabindex="-1"></a><span class="co"># Unique treatment arm event times</span></span>
+<span id="cb109-2"><a href="#cb109-2" tabindex="-1"></a>untimes1 <span class="ot">&lt;-</span> result[[<span class="dv">4</span>]]</span>
+<span id="cb109-3"><a href="#cb109-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;untimes1 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
 <pre><code>## untimes1 =</code></pre>
-<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" tabindex="-1"></a><span class="fu">print</span>(untimes1)</span></code></pre></div>
+<div class="sourceCode" id="cb111"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb111-1"><a href="#cb111-1" tabindex="-1"></a><span class="fu">print</span>(untimes1)</span></code></pre></div>
 <pre><code>## [1]  11  33  66 102 117 153 270 380</code></pre>
-<div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" tabindex="-1"></a><span class="co"># Number of unique control arm event times</span></span>
-<span id="cb93-2"><a href="#cb93-2" tabindex="-1"></a>nuntimes0 <span class="ot">&lt;-</span> result[[<span class="dv">5</span>]]</span>
-<span id="cb93-3"><a href="#cb93-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;nuntimes0 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb113"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb113-1"><a href="#cb113-1" tabindex="-1"></a><span class="co"># Number of unique control arm event times</span></span>
+<span id="cb113-2"><a href="#cb113-2" tabindex="-1"></a>nuntimes0 <span class="ot">&lt;-</span> result[[<span class="dv">5</span>]]</span>
+<span id="cb113-3"><a href="#cb113-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;nuntimes0 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
 <pre><code>## nuntimes0 =</code></pre>
-<div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" tabindex="-1"></a><span class="fu">print</span>(nuntimes0)</span></code></pre></div>
+<div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb115-1"><a href="#cb115-1" tabindex="-1"></a><span class="fu">print</span>(nuntimes0)</span></code></pre></div>
 <pre><code>## [1] 6</code></pre>
-<div class="sourceCode" id="cb97"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb97-1"><a href="#cb97-1" tabindex="-1"></a><span class="co"># Number of unique treatment arm event times</span></span>
-<span id="cb97-2"><a href="#cb97-2" tabindex="-1"></a>nuntimes1 <span class="ot">&lt;-</span> result[[<span class="dv">6</span>]]</span>
-<span id="cb97-3"><a href="#cb97-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;nuntimes1 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb117"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb117-1"><a href="#cb117-1" tabindex="-1"></a><span class="co"># Number of unique treatment arm event times</span></span>
+<span id="cb117-2"><a href="#cb117-2" tabindex="-1"></a>nuntimes1 <span class="ot">&lt;-</span> result[[<span class="dv">6</span>]]</span>
+<span id="cb117-3"><a href="#cb117-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;nuntimes1 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
 <pre><code>## nuntimes1 =</code></pre>
-<div class="sourceCode" id="cb99"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb99-1"><a href="#cb99-1" tabindex="-1"></a><span class="fu">print</span>(nuntimes1)</span></code></pre></div>
+<div class="sourceCode" id="cb119"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb119-1"><a href="#cb119-1" tabindex="-1"></a><span class="fu">print</span>(nuntimes1)</span></code></pre></div>
 <pre><code>## [1] 8</code></pre>
-<div class="sourceCode" id="cb101"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1" tabindex="-1"></a><span class="co"># Control arm max follow time</span></span>
-<span id="cb101-2"><a href="#cb101-2" tabindex="-1"></a>max_follow0 <span class="ot">&lt;-</span> result[[<span class="dv">7</span>]]</span>
-<span id="cb101-3"><a href="#cb101-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;max_follow0 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb121"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb121-1"><a href="#cb121-1" tabindex="-1"></a><span class="co"># Control arm max follow time</span></span>
+<span id="cb121-2"><a href="#cb121-2" tabindex="-1"></a>max_follow0 <span class="ot">&lt;-</span> result[[<span class="dv">7</span>]]</span>
+<span id="cb121-3"><a href="#cb121-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;max_follow0 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
 <pre><code>## max_follow0 =</code></pre>
-<div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" tabindex="-1"></a><span class="fu">print</span>(max_follow0)</span></code></pre></div>
+<div class="sourceCode" id="cb123"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb123-1"><a href="#cb123-1" tabindex="-1"></a><span class="fu">print</span>(max_follow0)</span></code></pre></div>
 <pre><code>## [1] 186</code></pre>
-<div class="sourceCode" id="cb105"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" tabindex="-1"></a><span class="co"># Treatment arm max follow time</span></span>
-<span id="cb105-2"><a href="#cb105-2" tabindex="-1"></a>max_follow1 <span class="ot">&lt;-</span> result[[<span class="dv">8</span>]]</span>
-<span id="cb105-3"><a href="#cb105-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;max_follow1 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb125"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb125-1"><a href="#cb125-1" tabindex="-1"></a><span class="co"># Treatment arm max follow time</span></span>
+<span id="cb125-2"><a href="#cb125-2" tabindex="-1"></a>max_follow1 <span class="ot">&lt;-</span> result[[<span class="dv">8</span>]]</span>
+<span id="cb125-3"><a href="#cb125-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;max_follow1 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
 <pre><code>## max_follow1 =</code></pre>
-<div class="sourceCode" id="cb107"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb107-1"><a href="#cb107-1" tabindex="-1"></a><span class="fu">print</span>(max_follow1)</span></code></pre></div>
+<div class="sourceCode" id="cb127"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb127-1"><a href="#cb127-1" tabindex="-1"></a><span class="fu">print</span>(max_follow1)</span></code></pre></div>
 <pre><code>## [1] 380</code></pre>
+<div class="sourceCode" id="cb129"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb129-1"><a href="#cb129-1" tabindex="-1"></a><span class="co"># Combined arm probabilities</span></span>
+<span id="cb129-2"><a href="#cb129-2" tabindex="-1"></a>dist2 <span class="ot">&lt;-</span> result[[<span class="dv">9</span>]]</span>
+<span id="cb129-3"><a href="#cb129-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;dist2 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## dist2 =</code></pre>
+<div class="sourceCode" id="cb131"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb131-1"><a href="#cb131-1" tabindex="-1"></a><span class="fu">print</span>(dist2)</span></code></pre></div>
+<pre><code>##      [,1] [,2] [,3] [,4]  [,5]  [,6]  [,7]  [,8]  [,9]   [,10]  [,11]  [,12]
+## [1,]  0.9  0.7  0.7  0.7 0.560 0.560 0.560 0.420 0.420 0.28000 0.2800 0.2800
+## [2,]  0.1  0.3  0.3  0.3 0.315 0.315 0.315 0.455 0.455 0.37625 0.1575 0.1575
+## [3,]  0.0  0.0  0.0  0.0 0.125 0.125 0.125 0.125 0.125 0.34375 0.5625 0.5625
+## [4,]  0.0  0.0  0.0  0.0 0.000 0.000 0.000 0.000 0.000 0.00000 0.0000 0.0000
+##       [,13]  [,14]
+## [1,] 0.2800 0.2800
+## [2,] 0.1575 0.1575
+## [3,] 0.5625 0.5625
+## [4,] 0.0000 0.0000</code></pre>
+<div class="sourceCode" id="cb133"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb133-1"><a href="#cb133-1" tabindex="-1"></a><span class="co"># Unique combined arm event times</span></span>
+<span id="cb133-2"><a href="#cb133-2" tabindex="-1"></a>untimes2 <span class="ot">&lt;-</span> result[[<span class="dv">10</span>]]</span>
+<span id="cb133-3"><a href="#cb133-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;untimes2 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## untimes2 =</code></pre>
+<div class="sourceCode" id="cb135"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb135-1"><a href="#cb135-1" tabindex="-1"></a><span class="fu">print</span>(untimes2)</span></code></pre></div>
+<pre><code>##  [1]  11  29  33  44  66  69  95 102 117 128 153 186 270 380</code></pre>
+<div class="sourceCode" id="cb137"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb137-1"><a href="#cb137-1" tabindex="-1"></a><span class="co"># Number of unique combined arm event times</span></span>
+<span id="cb137-2"><a href="#cb137-2" tabindex="-1"></a>nuntimes2 <span class="ot">&lt;-</span> result[[<span class="dv">11</span>]]</span>
+<span id="cb137-3"><a href="#cb137-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;nuntimes2 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## nuntimes2 =</code></pre>
+<div class="sourceCode" id="cb139"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb139-1"><a href="#cb139-1" tabindex="-1"></a><span class="fu">print</span>(nuntimes2)</span></code></pre></div>
+<pre><code>## [1] 14</code></pre>
+<div class="sourceCode" id="cb141"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb141-1"><a href="#cb141-1" tabindex="-1"></a><span class="co"># Combined arm max follow time</span></span>
+<span id="cb141-2"><a href="#cb141-2" tabindex="-1"></a>max_follow2 <span class="ot">&lt;-</span> result[[<span class="dv">12</span>]]</span>
+<span id="cb141-3"><a href="#cb141-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;max_follow2 =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## max_follow2 =</code></pre>
+<div class="sourceCode" id="cb143"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb143-1"><a href="#cb143-1" tabindex="-1"></a><span class="fu">print</span>(max_follow2)</span></code></pre></div>
+<pre><code>## [1] 380</code></pre>
+<div class="sourceCode" id="cb145"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb145-1"><a href="#cb145-1" tabindex="-1"></a><span class="co"># Combined arm KM</span></span>
+<span id="cb145-2"><a href="#cb145-2" tabindex="-1"></a>comkm <span class="ot">&lt;-</span> result[[<span class="dv">13</span>]]</span>
+<span id="cb145-3"><a href="#cb145-3" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;comkm =&quot;</span>, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)</span></code></pre></div>
+<pre><code>## comkm =</code></pre>
+<div class="sourceCode" id="cb147"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb147-1"><a href="#cb147-1" tabindex="-1"></a><span class="fu">print</span>(comkm)</span></code></pre></div>
+<pre><code>##      [,1] [,2] [,3] [,4]  [,5]  [,6]  [,7]  [,8]  [,9]   [,10]  [,11]  [,12]
+## [1,]  1.0  1.0  1.0  1.0 1.000 1.000 1.000 1.000 1.000 1.00000 1.0000 1.0000
+## [2,]  1.0  1.0  1.0  1.0 0.875 0.875 0.875 0.875 0.875 0.65625 0.4375 0.4375
+## [3,]  0.9  0.7  0.7  0.7 0.560 0.560 0.560 0.420 0.420 0.28000 0.2800 0.2800
+##       [,13]  [,14]
+## [1,] 1.0000 1.0000
+## [2,] 0.4375 0.4375
+## [3,] 0.2800 0.2800</code></pre>
 </div>
 </div>
 </div>

@@ -19,8 +19,12 @@
 COMP <- function(n,Time,Delta,cov,trt) {
   TIME_COMP <- numeric(n)
   DELTA_COMP <- numeric(n)
+  m=length(Time[,1])
+
   for (i in 1:n) {
-    TIME_COMP[i] <- min(Time[ ,i])
+    TIME_COMP[i] <- Time[m,i]
+    TIME_COMP[i] <- min(TIME_COMP[i],Time[Delta[,i]==1,i])
+#    TIME_COMP[i] <- min(Time[ ,i])
     DELTA_COMP[i] <- max(Delta[ ,i])
   }
 

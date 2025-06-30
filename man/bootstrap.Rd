@@ -6,7 +6,7 @@
 \usage{
 bootstrap(
   type,
-  rmst_restriction,
+  time_restriction,
   model,
   n,
   m,
@@ -17,13 +17,14 @@ bootstrap(
   z_ewtr,
   z_comp,
   resample_num,
-  seed
+  seed,
+  nimp
 )
 }
 \arguments{
 \item{type}{A string value indicating the wintime package method that will run with resampling.}
 
-\item{rmst_restriction}{The RMT cutoff value (days).}
+\item{time_restriction}{The time cutoff value (days).}
 
 \item{model}{A string value indicating the model used on observed data ('markov' or 'km').}
 
@@ -49,12 +50,15 @@ represent covariate values.}
 \item{resample_num}{The number of desired bootstraps.}
 
 \item{seed}{The seed used for random number generation.}
+
+\item{nimp}{The number of random imputations for Redistribution-to-the-right.}
 }
 \value{
-A vector of length resample_num containing the calculated treatment effect estimates (for type='max' these are z-statistics) for each bootstrap.
+A list of a vector of length resample_num containing the calculated treatment effect estimates (for type='max' these are z-statistics) for each bootstrap,
+a m x resample_num matrix of the components of the treatment effect.
 }
 \description{
 This function reruns the desired wintime package method on a given number of bootstrap samples. This resampling method is recommended
-for all pairwise wintime methods including Win time ratio (WTR), Restricted win time ratio (RWTR), and Pairwise win time (PWT). This
-function is also recommended for the EWTR_composite max test (MAX).
+for all pairwise wintime methods including Win time ratio (WTR), Restricted win time ratio (RWTR), Pairwise win time (PWT), and
+Restricted Pairwise win time (RPWT). This function is also recommended for the EWTR_composite max test (MAX).
 }

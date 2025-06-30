@@ -72,7 +72,7 @@ print(result)
 
 ## ----- rmt--------------------------------------------------------------------
 # Run rmt
-result <- wintime("rmt", Time, Delta, trt, rmst_restriction = round(1.5*365.25))
+result <- wintime("rmt", Time, Delta, trt, time_restriction = round(1.5*365.25))
 print(result)
 
 ## ----- ewt resampling---------------------------------------------------------
@@ -149,6 +149,31 @@ max_follow1 <- result[[8]]
 cat("max_follow1 =", "\n")
 print(max_follow1)
 
+# Combined arm probabilities
+dist2 <- result[[9]]
+cat("dist2 =", "\n")
+print(dist2)
+
+# Unique combined arm event times
+untimes2 <- result[[10]]
+cat("untimes2 =", "\n")
+print(untimes2)
+
+# Number of unique combined arm event times
+nuntimes2 <- result[[11]]
+cat("nuntimes2 =", "\n")
+print(nuntimes2)
+
+# Combined arm max follow time
+max_follow2 <- result[[12]]
+cat("max_follow2 =", "\n")
+print(max_follow2)
+
+# Combined arm transition probabilities
+trans_prob2 <- result[[13]]
+cat("trans_prob2 =", "\n")
+print(trans_prob2)
+
 ## ----- km---------------------------------------------------------------------
 # Run km
 result <- km(n0, n1, m, Time, Delta)
@@ -192,4 +217,29 @@ print(max_follow0)
 max_follow1 <- result[[8]]
 cat("max_follow1 =", "\n")
 print(max_follow1)
+
+# Combined arm probabilities
+dist2 <- result[[9]]
+cat("dist2 =", "\n")
+print(dist2)
+
+# Unique combined arm event times
+untimes2 <- result[[10]]
+cat("untimes2 =", "\n")
+print(untimes2)
+
+# Number of unique combined arm event times
+nuntimes2 <- result[[11]]
+cat("nuntimes2 =", "\n")
+print(nuntimes2)
+
+# Combined arm max follow time
+max_follow2 <- result[[12]]
+cat("max_follow2 =", "\n")
+print(max_follow2)
+
+# Combined arm KM
+comkm <- result[[13]]
+cat("comkm =", "\n")
+print(comkm)
 

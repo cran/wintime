@@ -1,38 +1,37 @@
-#' Expected win time against reference
+#' Expected win time against trial population
 #'
-#' Calculates the control group state space probabilities using a Markov model (recommended) or a Kaplan-Meier model. This function uses these
-#' probabilities to compare each participant's clinical state to a distribution of control group states.
+#' Calculates the combined arm state space probabilities using a Markov model or a Kaplan-Meier model (recommended). This function uses these
+#' probabilities to compare each participant's clinical state to a distribution of combined arm states.
 #'
 #' @param n The total number of trial participants.
 #' @param m The number of events in the hierarchy.
-#' @param nunique The number of unique control group event times (returned from wintime::markov() or wintime::km()).
-#' @param maxfollow The max control group follow up time (days) (returned from wintime::markov() or wintime::km()).
-#' @param untimes A vector containing unique control group event times (days) (returned from wintime::markov() or wintime::km()).
+#' @param nunique The number of unique combined arm event times (returned from wintime::markov() or wintime::km()).
+#' @param maxfollow The max combined arm follow up time (days) (returned from wintime::markov() or wintime::km()).
+#' @param untimes A vector containing unique combined arm event times (days) (returned from wintime::markov() or wintime::km()).
 #' @param Time A m x n matrix of event times (days). Rows should represent events and columns should represent participants. Rows should be
 #' in increasing order of clinical severity.
 #' @param Delta A m x n matrix of event indicators Rows should represent events and columns should represent participants. Rows should be
 #' in increasing order of clinical severity.
-#' @param dist A matrix of control group state probabilities (returned from wintime::markov() or wintime::km()).
+#' @param dist A matrix of combined arm state probabilities (returned from wintime::markov() or wintime::km()).
 #' @param markov_ind An indicator of the model type used (1 for Markov, 0 for Kaplan-Meier).
 #' @param cov A n x p matrix of covariate values, where p is the number of covariates.
 #' @param trt A vector of length n containing treatment arm indicators (1 for treatment, 0 for control).
 #' @return A list containing: The estimated treatment effect from the linear regression model, the variance, the Z-statistic, the components of the treatment effect, and the variance of the components.
 
-# ----------------------------------------
-# Expected win time against reference
-# ----------------------------------------
-EWTR <- function(n,m,nunique,maxfollow,untimes,Time,Delta,dist,markov_ind,cov,trt) {
+# -------------------------------------------
+# Expected win time against trial population
+# -------------------------------------------
+EWTP <- function(n,m,nunique,maxfollow,untimes,Time,Delta,dist,markov_ind,cov,trt) {
   time <- Time[m:1, ]
   delta <- Delta[m:1, ]
   components <- rep(NA,m)
   components_var <- rep(NA,m)
 
-
   # Initialize temporary variables
   tuntimes <- numeric(nunique+3)
   tdist <- matrix(0,nrow=m+1,ncol=nunique+m)
-  ewtr <- numeric(n)
-  ewtr_components <- matrix(0,nrow=m,ncol=n)
+  ewtp <- numeric(n)
+  ewtp_components <- matrix(0,nrow=m,ncol=n)
 
   # Start main loop
   for (i in 1:n) {
@@ -42,7 +41,7 @@ EWTR <- function(n,m,nunique,maxfollow,untimes,Time,Delta,dist,markov_ind,cov,tr
       tuntimes[j] <- untimes[j]
     }
 
-    # Copy control distributions
+    # Copy combined arm distributions
     for (event in 1:(m+1)) {
       for (t in 1:min(nunique,ncol(dist))) {
         tdist[event,t] <- dist[event,t]
@@ -105,9 +104,12 @@ EWTR <- function(n,m,nunique,maxfollow,untimes,Time,Delta,dist,markov_ind,cov,tr
     if (markov_ind == FALSE) {
       jmax <- min(maxfollow,jmax)
     }
-    if (delta[1,i] == 1) {
+    if (delta[1,i] == 1 | jmax >= tnunique) {
       jmax <- tnunique - 1
     }
+#    if (i==3) {
+#      cat('jmax=',jmax,'\n')
+#    }
 
     # Set state
     if (jmax != 0) {
@@ -120,16 +122,20 @@ EWTR <- function(n,m,nunique,maxfollow,untimes,Time,Delta,dist,markov_ind,cov,tr
             break
           }
         }
+#        if (i==3) {
+#          cat('j=',j,'\n')
+#          cat('state=',state,'\n')
+#        }
 
-        # Calculate ewtr
+        # Calculate ewtp
 
         # Calculate wins
         for (state_num in 0:(m-1)) {
           if (state_num == state) {
             # Add probabilities from higher states
             for (k in (state_num+1):m) {
-              ewtr[i] <- ewtr[i] + tdist[k+1,j] * (tuntimes[j+1] - tuntimes[j])
-              ewtr_components[k,i] <- ewtr_components[k,i] + tdist[k+1,j] * (tuntimes[j+1]-tuntimes[j])
+              ewtp[i] <- ewtp[i] + tdist[k+1,j] * (tuntimes[j+1] - tuntimes[j])
+              ewtp_components[k,i] <- ewtp_components[k,i] + tdist[k+1,j] * (tuntimes[j+1]-tuntimes[j])
             }
             break
           }
@@ -140,41 +146,48 @@ EWTR <- function(n,m,nunique,maxfollow,untimes,Time,Delta,dist,markov_ind,cov,tr
           if (current == state) {
             # Subtract probabilities from lower states
             for (k in 1:current) {
-              ewtr[i] <- ewtr[i] - tdist[k,j] * (tuntimes[j+1] - tuntimes[j])
-              ewtr_components[current,i] <- ewtr_components[current,i] - tdist[k,j] * (tuntimes[j+1]-tuntimes[j])
+              ewtp[i] <- ewtp[i] - tdist[k,j] * (tuntimes[j+1] - tuntimes[j])
+              ewtp_components[current,i] <- ewtp_components[current,i] - tdist[k,j] * (tuntimes[j+1]-tuntimes[j])
             }
             break
           }
         }
+#        if (i==3) {
+#          cat('ewtp=',ewtp[3],'\n')
+#        }
       }
     }
   }
+#  cat('----------------------------------------------------','\n')
+#  cat('ewtp=','\n')
+#  print(ewtp)
+#  cat('----------------------------------------------------','\n')
 
   # Get treatment estimate and variance for Z statistic
   fit_comp <- vector("list",m)
   if (!is.null(cov)) {
-    fite=lm(ewtr~trt+cov)
+    fite=lm(ewtp~trt+cov)
     for (k in 1:m) {
-      outcome <- ewtr_components[k,]
+      outcome <- ewtp_components[k,]
       dim(outcome) <- c(n)
       fit_comp[[k]] <- lm(outcome~trt+cov)
     }
   }
   else {
-    fite <- lm(ewtr~trt)
+    fite <- lm(ewtp~trt)
     for (k in 1:m) {
-      outcome <- ewtr_components[k,]
+      outcome <- ewtp_components[k,]
       dim(outcome) <- c(n)
       fit_comp[[k]] <- lm(outcome~trt)
     }
   }
-  ewtr_time=coef(fite)[2]
-  ewtr_time_var=vcov(fite)[2,2]
-  z_ewtr <- ewtr_time/sqrt(ewtr_time_var)
+  ewtp_time=coef(fite)[2]
+  ewtp_time_var=vcov(fite)[2,2]
+  z_ewtp <- ewtp_time/sqrt(ewtp_time_var)
   for (k in 1:m) {
     components[k] <- coef(fit_comp[[k]])[2]
     components_var[k] <- vcov(fit_comp[[k]])[2,2]
   }
 
-  return(list(ewtr_time,ewtr_time_var,z_ewtr,components,components_var))
+  return(list(ewtp_time,ewtp_time_var,z_ewtp,components,components_var))
 }

@@ -14,7 +14,9 @@
 #' @return A list containing: a matrix of control arm state probabilities, a matrix of treatment arm state probabilities,
 #' a vector of unique control arm event times (days), a vector of unique treatment arm event times (days), the number of unique control
 #' arm event times, the number of unique treatment arm event times, the control arm max follow time (days), the treatment arm
-#' max follow time (days).
+#' max follow time (days), a matrix of combined arm state probabilities, a vector of unique combined arm event times (days),
+#' the number of unique combined arm event times, the combined arm max follow time (days), a (m x number unique combined arm event times)
+#' matrix of combined arm km survival probabilities, matrix of trt arm km survival probabilities, matrix of control arm km survival probabilities.
 #' @examples
 #' # -----------------------------
 #' # Example inputs
@@ -96,6 +98,7 @@ km <- function(n0,n1,m,Time,Delta) {
   # Create KM survival curve matrices
   Time0 <- matrix(0,nrow=m,ncol=n)
   Surv0 <- matrix(0,nrow=m,ncol=n)
+  conkm <- matrix(0,nrow=m,ncol=m*n)
 
   for (k in 1:m) {
     # temp <- survfit(Surv(time_km[k,dataset1$trt==0],delta_km[k,dataset1$trt==0])~1)$time
@@ -151,6 +154,22 @@ km <- function(n0,n1,m,Time,Delta) {
     nunique_event_times0=nunique_event_times0+1
     unique_event_times0[nunique_event_times0]=time
 
+    #  Update conkm[]
+    #
+    for (k in 1:m) {
+      if (Time0[k,next_count[k]] == time) {
+        conkm[k,nunique_event_times0] <- Surv0[k,next_count[k]]
+      }
+      else {
+        if (nunique_event_times0==1) {
+          conkm[k,nunique_event_times0] <- 1.0
+        }
+        else {
+          conkm[k,nunique_event_times0] <- conkm[k,nunique_event_times0-1]
+        }
+      }
+    }
+
     for (k in 1:m) {
       if (Time0[k,next_count[k]] <= time) {
         count[k] <- next_count[k]
@@ -180,6 +199,7 @@ km <- function(n0,n1,m,Time,Delta) {
     }
   }
   unique_event_times0=unique_event_times0[1:nunique_event_times0]
+  conkm=conkm[1:m,1:nunique_event_times0]
 
   #---------------------------------------------------------------------
   # TREATMENT GROUP
@@ -189,6 +209,7 @@ km <- function(n0,n1,m,Time,Delta) {
   # Create KM survival curve matrices
   Time1 <- matrix(0,nrow=m,ncol=n)
   Surv1 <- matrix(0,nrow=m,ncol=n)
+  trtkm <- matrix(0,nrow=m,ncol=m*n)
 
   for (k in 1:m) {
     # temp <- survfit(Surv(time_km[k,dataset1$trt==1],delta_km[k,dataset1$trt==1])~1)$time
@@ -245,6 +266,22 @@ km <- function(n0,n1,m,Time,Delta) {
     nunique_event_times1=nunique_event_times1+1
     unique_event_times1[nunique_event_times1]=time
 
+    #  Update trtkm[]
+    #
+    for (k in 1:m) {
+      if (Time1[k,next_count[k]] == time) {
+        trtkm[k,nunique_event_times1] <- Surv1[k,next_count[k]]
+      }
+      else {
+        if (nunique_event_times1==1) {
+          trtkm[k,nunique_event_times1] <- 1.0
+        }
+        else {
+          trtkm[k,nunique_event_times1] <- trtkm[k,nunique_event_times1-1]
+        }
+      }
+    }
+
     for (k in 1:m) {
       if (Time1[k,next_count[k]] <= time) {
         count[k] <- next_count[k]
@@ -274,6 +311,160 @@ km <- function(n0,n1,m,Time,Delta) {
     }
   }
   unique_event_times1=unique_event_times1[1:nunique_event_times1]
+  trtkm=trtkm[1:m,1:nunique_event_times1]
+
+  #---------------------------------------------------------------------
+  # COMBINED ARM
+  #
+  #---------------------------------------------------------------------
+
+  # Create KM survival curve matrices
+  Time2 <- matrix(0,nrow=m,ncol=n)
+  Surv2 <- matrix(0,nrow=m,ncol=n)
+  comkm <- matrix(0,nrow=m,ncol=m*n)
+
+  for (k in 1:m) {
+    # temp <- survfit(Surv(time_km[k,dataset1$trt==0],delta_km[k,dataset1$trt==0])~1)$time
+    # temp2 <- survfit(Surv(time_km[k,dataset1$trt==0],delta_km[k,dataset1$trt==0])~1)$surv
+    temp <- survival::survfit(survival::Surv(time_km[k,1:n],delta_km[k,1:n])~1)$time
+    temp2 <- survival::survfit(survival::Surv(time_km[k,1:n],delta_km[k,1:n])~1)$surv
+    Time2[k,1:length(temp)] <- temp
+    Surv2[k,1:length(temp2)] <- temp2
+  }
+#  cat('length(Time2[1,])=',length(Time2[1,]),'\n')
+#  cat('length(Time2[2,])=',length(Time2[2,]),'\n')
+#  cat('length(Time2[3,])=',length(Time2[3,]),'\n')
+#  cat('Time2[1,1:120]=',Time2[1,1:120],'\n')
+#  cat('Surv2[1,1:15]=',Surv2[1,1:15],'\n')
+#  cat('Time2[2,1:120]=',Time2[2,1:120],'\n')
+#  cat('Surv2[2,1:15]=',Surv2[2,1:15],'\n')
+#  cat('Time2[3,1:120]=',Time2[3,1:120],'\n')
+#  cat('Surv2[3,1:15]=',Surv2[3,1:15],'\n')
+#  cat('------------------------------------------','\n')
+
+  nkm <- numeric(m)
+  for (k in 1:m) {
+    nkm[k] <- sum(Time2[k,] != 0)
+  }
+
+#  cat('nkm[1]=',nkm[1],'\n')
+#  cat('nkm[2]=',nkm[2],'\n')
+#  cat('nkm[3]=',nkm[3],'\n')
+#  cat('------------------------------------------','\n')
+
+
+  dist_state2 <- matrix(0,nrow=(m+1),ncol=sum(nkm))
+  unique_event_times2 <- rep(0,times=sum(nkm))
+
+  # Get max follow time
+  com_follow_times <- rep(0,times=m)
+  for (i in 1:m) {
+    com_follow_times[i] <- Time2[i,nkm[i]]
+  }
+  max_follow2 <- min(com_follow_times)
+
+#   cat('max_follow2=',max_follow2,'\n')
+#   cat('------------------------------------------','\n')
+
+
+  time <- 0
+  count <- rep(0,m)
+  max_times <- rep(0,m)
+  nunique_event_times2 <- 0
+
+  next_count <- rep(0,m)
+
+  while (time < max_follow2) {
+    for (i in 1:m) {
+      next_count[i] <- count[i] + 1
+    }
+    for (i in 1:m) {
+      if (next_count[i] > nkm[i]) {
+        next_count[i] <- nkm[i]
+        max_times[i] <- 1
+      }
+    }
+
+    time <- max(Time2)
+    for (k in 1:m) {
+      if (max_times[k] == 0) {
+        if (Time2[k,next_count[k]] < time) {
+          time <- Time2[k,next_count[k]]
+        }
+      }
+    }
+
+    nunique_event_times2=nunique_event_times2+1
+    unique_event_times2[nunique_event_times2]=time
+
+    #  Update comkm[]
+    #
+    for (k in 1:m) {
+      if (Time2[k,next_count[k]] == time) {
+        comkm[k,nunique_event_times2] <- Surv2[k,next_count[k]]
+      }
+      else {
+        if (nunique_event_times2==1) {
+          comkm[k,nunique_event_times2] <- 1.0
+        }
+        else {
+          comkm[k,nunique_event_times2] <- comkm[k,nunique_event_times2-1]
+        }
+      }
+    }
+
+    # if (time < Time2[3,15]) {
+    # cat('time=',time,'\n')
+    # cat('nunique_event_times2=',nunique_event_times2,'\n')
+    # cat('next_count[1]=',next_count[1],'\n')
+    # cat('next_count[2]=',next_count[2],'\n')
+    # cat('next_count[3]=',next_count[3],'\n')
+    # cat('comkm[1,1:15]=',comkm[1,1:15],'\n')
+    # cat('comkm[2,1:15]=',comkm[2,1:15],'\n')
+    # cat('comkm[3,1:15]=',comkm[3,1:15],'\n')
+    # cat('------------------------------------------','\n')
+    # }
+
+    for (k in 1:m) {
+      if (Time2[k,next_count[k]] <= time) {
+        count[k] <- next_count[k]
+      }
+    }
+
+    # Set probability of being in state 0
+    if (count[m] > 0) {
+      dist_state2[1,nunique_event_times2] <- Surv2[m,count[m]]
+    }
+    else {
+      dist_state2[1,nunique_event_times2] <- 1
+    }
+
+    # Set probability of being in current state
+    for (i in 1:m) {
+      state_num <- (m - i) + 1
+      if (count[i] > 0) {
+        dist_state2[state_num+1,nunique_event_times2] <- 1 - Surv2[i,count[i]]
+        # Subtract previously calculated probabilities
+        if (state_num < m) {
+          for (j in (state_num+1):m) {
+            dist_state2[(state_num+1),nunique_event_times2] <- dist_state2[(state_num+1),nunique_event_times2] - dist_state2[(j+1),nunique_event_times2]
+          }
+        }
+      }
+    }
+  }
+  unique_event_times2=unique_event_times2[1:nunique_event_times2]
+  dist_state2=dist_state2[1:(m+1),1:nunique_event_times2]
+  comkm=comkm[1:m,1:nunique_event_times2]
+#  cat('----------------------------------------------------','\n')
+#  cat('nunique_event_times2=',nunique_event_times2,'\n')
+#  cat('unique_event_times2=',unique_event_times2,'\n')
+#  cat('dist_state2=','\n')
+#  print(dist_state2)
+#  cat('----------------------------------------------------','\n')
+
   return(list(dist_state0 = dist_state0,dist_state1 = dist_state1,unique_event_times0 = unique_event_times0,unique_event_times1 = unique_event_times1,
-              nunique_event_times0 = nunique_event_times0,nunique_event_times1 = nunique_event_times1,max_follow0 = max_follow0,max_follow1 = max_follow1))
+              nunique_event_times0 = nunique_event_times0,nunique_event_times1 = nunique_event_times1,max_follow0 = max_follow0,max_follow1 = max_follow1,
+              dist_state2 = dist_state2, unique_event_times2 = unique_event_times2, nunique_event_times2 = nunique_event_times2, max_follow2 = max_follow2,
+              comkm=comkm,trtkm=trtkm,conkm=conkm))
 }

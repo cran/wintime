@@ -39,7 +39,8 @@ test_that("markov function handles valid inputs", {
   result <- markov(n0, n1, m, Time, Delta)
   expect_type(result, "list")
   expect_named(result, c("dist_state0", "dist_state1", "unique_event_times0", "unique_event_times1", "nunique_event_times0", "nunique_event_times1",
-                         "max_follow0", "max_follow1"))
+                         "max_follow0", "max_follow1","dist_state2","unique_event_times2","nunique_event_times2","max_follow2","trans_prob2",
+                         "trans_prob1","trans_prob0"))
 })
 
 test_that("markov function handles invalid inputs", {
@@ -77,7 +78,7 @@ test_that("km function handles valid inputs", {
   result <- km(n0, n1, m, Time, Delta)
   expect_type(result, "list")
   expect_named(result, c("dist_state0", "dist_state1", "unique_event_times0", "unique_event_times1", "nunique_event_times0", "nunique_event_times1",
-                         "max_follow0", "max_follow1"))
+                         "max_follow0", "max_follow1", "dist_state2","unique_event_times2","nunique_event_times2","max_follow2","comkm","trtkm","conkm"))
 })
 
 test_that("km function handles invalid inputs", {
