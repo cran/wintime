@@ -17,7 +17,7 @@
 #' @param seed Optional. Seed used for random number generation in resampling.
 #' @param nimp Required only for `type` = 'ewtpr','rewtpr'. The number of random imputations for Redistribution-to-the-right.
 #' @return A list containing: the observed treatment effect, a vector of length `resample_num` containing resampled treatment effects, a message
-#' indicating the method ran and the type of resampling done, the variance, the p-value, the total wins on treatment (pairwise methods only),
+#' indicating the method ran and the type of resampling done, the variance, the p-value (one-sided for treatment benefit), the total wins on treatment (pairwise methods only),
 #' the total losses on treatment (pairwise methods only), a vector of length 'm' with the components of the treatment effect,
 #' a vector of length 'm' with the variance of the components. A warning message will be printed for combinations of `type` and `model`/`resample`
 #' that are not recommended.
@@ -411,13 +411,13 @@ wintime <- function(type,Time,Delta,trt,cov = NULL,model = NULL,resample = NULL,
     }
     components_var <- sd_components^2
     if (type == "wtr" || type == "rwtr") {
-      p <- 2*(1-pnorm(abs(data-1)/sd_type,mean=0,sd=1))
+      p <- (1-pnorm(abs(data-1)/sd_type,mean=0,sd=1))
     }
     else if (type == "ewt" || type == "rmt" || type == "max") {
       p <- (sum(data < resample_data) + 1)/(resample_num + 1)
     }
     else {
-      p <- 2*(1-pnorm(abs(data)/sd_type,mean=0,sd=1))
+      p <- (1-pnorm(abs(data)/sd_type,mean=0,sd=1))
     }
   }
   else {
@@ -425,7 +425,7 @@ wintime <- function(type,Time,Delta,trt,cov = NULL,model = NULL,resample = NULL,
     if (type %in% c("ewtr","ewtp","rewtp","ewtpr","rewtpr")) {
       variance <- obs_data[[2]]
       #cat('variance=',variance,'\n')
-      p <- 2*(1-pnorm(abs(data)/sqrt(variance),mean=0,sd=1))
+      p <- (1-pnorm(abs(data)/sqrt(variance),mean=0,sd=1))
     }
   }
 #  cat('warnings','\n')

@@ -192,8 +192,8 @@ REWTPR <- function(n,m,nunique2,maxfollow2,untimes2,Time,Delta,dist2,markov_ind,
 
 #--------------------------------------------------------
 # FOR COMPARISON WITH FORTRAN
-  random=runif(n*nunique2*nimp)
-  iran=1
+  #random=runif(n*nunique2*nimp)
+  #iran=1
 #--------------------------------------------------------
 
   rewtpr_time=rep(0,nimp)
@@ -551,12 +551,13 @@ REWTPR <- function(n,m,nunique2,maxfollow2,untimes2,Time,Delta,dist2,markov_ind,
         # }
         #if (runif(1) < sum | k==m+1) {
         #--------------------------------------------------------
+        if (runif(1) < sum | k==m+1) {
         # FOR COMPARISON WITH FORTRAN
-        if (random[iran] < sum | k==m+1) {
+        #if (random[iran] < sum | k==m+1) {
 
           state_dist[1:(m+1)]=0
           state_dist[k]=1
-          iran=iran+1
+          #iran=iran+1
           break
         #} else {
         #  iran=iran+1
@@ -728,13 +729,13 @@ REWTPR <- function(n,m,nunique2,maxfollow2,untimes2,Time,Delta,dist2,markov_ind,
         sum=state_dist[1]
         for (k in 1:(m+1)) {
 
-          #if (runif(1) < sum | k==m) {
+          if (runif(1) < sum | k==m+1) {
           # FOR COMPARISON WITH FORTRAN
-          if (random[iran] < sum | k==m+1) {
+          #if (random[iran] < sum | k==m+1) {
 
             state_dist[1:(m+1)]=0
             state_dist[k]=1
-            iran=iran+1
+            #iran=iran+1
             break
           #} else {
           #  iran=iran+1

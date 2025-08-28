@@ -46,7 +46,7 @@ Rows should represent participants and columns should represent covariate values
 }
 \value{
 A list containing: the observed treatment effect, a vector of length \code{resample_num} containing resampled treatment effects, a message
-indicating the method ran and the type of resampling done, the variance, the p-value, the total wins on treatment (pairwise methods only),
+indicating the method ran and the type of resampling done, the variance, the p-value (one-sided for treatment benefit), the total wins on treatment (pairwise methods only),
 the total losses on treatment (pairwise methods only), a vector of length 'm' with the components of the treatment effect,
 a vector of length 'm' with the variance of the components. A warning message will be printed for combinations of \code{type} and \code{model}/\code{resample}
 that are not recommended.
