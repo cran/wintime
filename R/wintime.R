@@ -342,7 +342,7 @@ wintime <- function(type,Time,Delta,trt,cov = NULL,model = NULL,resample = NULL,
   if (type == "wtr" || type == "rwtr") {
     data <- obs_data[[1]]
   }
-  else if (type %in% c("ewtr","ewtp","rewtp","ewtpr","rewtpr")) {
+  else if (type %in% c("ewtr","ewtp","rewtp")) {
     data <- obs_data[[1]]
     components <- obs_data[[4]]
     components_var <- obs_data[[5]]
@@ -350,6 +350,11 @@ wintime <- function(type,Time,Delta,trt,cov = NULL,model = NULL,resample = NULL,
   else if (type %in% c("pwt","rpwt","rmt","ewt")) {
     data <- obs_data[[1]]
     components <- obs_data[[2]]
+  }
+  else if (type %in% c("ewtpr","rewtpr")) {
+    data <- obs_data[[1]]
+    components <- obs_data[[4]]
+    components_var <- obs_data[[5]]
   }
   else {
     data <- obs_data
@@ -360,6 +365,8 @@ wintime <- function(type,Time,Delta,trt,cov = NULL,model = NULL,resample = NULL,
   #print(data)
   #cat('components=','\n')
   #print(components)
+  #cat('components_var=','\n')
+  #print(components_var)
   # ----------------------------
   # Hypothesis testing
   # ----------------------------
@@ -376,7 +383,7 @@ wintime <- function(type,Time,Delta,trt,cov = NULL,model = NULL,resample = NULL,
     # Run type function on bootstrap data
     if (resample == "boot" || resample == "bootstrap") {
       message <- paste("Resampling of ", type, " done on ", resample_num, " bootstraps.")
-      temp <- bootstrap(type,time_restriction,model,n,m,Time,Delta,trt,cov,z_ewtr,z_comp,resample_num,seed)
+      temp <- bootstrap(type,time_restriction,model,n,m,Time,Delta,trt,cov,z_ewtr,z_comp,resample_num,seed,nimp)
       resample_data <- temp[[1]]
       if (type %in% c("ewtr","ewtp","rewtp","ewtpr","rewtpr","pwt","rpwt","rmt","ewt")) {
         resample_components <- temp[[2]]
@@ -387,7 +394,7 @@ wintime <- function(type,Time,Delta,trt,cov = NULL,model = NULL,resample = NULL,
     # Run type function on permuted data
     else if (resample == "perm" || resample == "permutation" || resample == "perms" || resample == "permutations") {
       message <- paste("Resampling of ", type, " done on ", resample_num, " permutations.")
-      temp <- perm(type,time_restriction,model,n,m,Time,Delta,trt,cov,z_ewtr,z_comp,resample_num,seed)
+      temp <- perm(type,time_restriction,model,n,m,Time,Delta,trt,cov,z_ewtr,z_comp,resample_num,seed,nimp)
       resample_data <- temp[[1]]
       if (type %in% c("ewtr","ewtp","rewtp","ewtpr","rewtpr","pwt","rpwt","rmt","ewt")) {
         resample_components <- temp[[2]]
@@ -413,8 +420,10 @@ wintime <- function(type,Time,Delta,trt,cov = NULL,model = NULL,resample = NULL,
     if (type == "wtr" || type == "rwtr") {
       p <- (1-pnorm(abs(data-1)/sd_type,mean=0,sd=1))
     }
-    else if (type == "ewt" || type == "rmt" || type == "max") {
+    else if (type == "ewt" || type == "rmt" || type== "ewtpr" || type== "rewtpr" || type == "max") {
       p <- (sum(data < resample_data) + 1)/(resample_num + 1)
+      #cat('num=',sum(data < resample_data)+1,'\n')
+      #cat('denom=',resample_num+1,'\n')
     }
     else {
       p <- (1-pnorm(abs(data)/sd_type,mean=0,sd=1))
@@ -428,6 +437,10 @@ wintime <- function(type,Time,Delta,trt,cov = NULL,model = NULL,resample = NULL,
       p <- (1-pnorm(abs(data)/sqrt(variance),mean=0,sd=1))
     }
   }
+  #cat('components=','\n')
+  #print(components)
+  #cat('components_var=','\n')
+  #print(components_var)
 #  cat('warnings','\n')
   # ---------------------------------------------------------------------------------------------------
   # Warning message for certain combinations of type and model/resampling method

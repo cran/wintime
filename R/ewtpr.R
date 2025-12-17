@@ -250,11 +250,20 @@ EWTPR <- function(n,m,nunique2,maxfollow2,untimes2,Time,Delta,dist2,markov_ind,c
   # cat("-----------------------------------------------", "\n")
 
 
+  #currentseed=.Random.seed[2]
+  #currentseed=.Random.seed[currentseed+2]
+  #cat("current seed for EWTPR calculation =",.Random.seed, "\n")
+  # cat("-----------------------------------------------", "\n")
+
   #--------------------------------------------------------
   # FOR COMPARISON WITH FORTRAN
+  #set.seed(1092423368)
   #random=runif(n*nunique2*nimp)
   #iran=1
-  #--------------------------------------------------------
+  #------------------------------------------------------
+  #cat("random numbers =",random[1:10], "\n")
+  #cat("-----------------------------------------------", "\n")
+
 
   ewtpr_time=rep(0,nimp)
   ewtpr_time_var=rep(0,nimp)
@@ -273,21 +282,24 @@ EWTPR <- function(n,m,nunique2,maxfollow2,untimes2,Time,Delta,dist2,markov_ind,c
   # START LOOP OVER SUBJECTS
   for (i in 1:n) {
 
-   # if (i==13) {
-   #   cat("-----------------------------------------------", "\n")
-   #   cat("-----------------------------------------------", "\n")
-   #   cat("i=" ,i, "\n")
-   #   cat("time[,i]" ,time[,i], "\n")
-   #   cat("delta[,i]" ,delta[,i], "\n")
-   #   cat("trt[i]" ,trt[i], "\n")
-#      cat("trans_prob[1,1,]" ,trans_prob[1,1,], "\n")
-#      cat("trans_prob[1,2,]" ,trans_prob[1,2,], "\n")
-#      cat("trans_prob[1,3,]" ,trans_prob[1,3,], "\n")
-#      cat("trans_prob[2,2,]" ,trans_prob[2,2,], "\n")
-#      cat("trans_prob[2,3,]" ,trans_prob[2,3,], "\n")
-#      cat("trans_prob[3,3,]" ,trans_prob[3,3,], "\n")
-#     cat("-----------------------------------------------", "\n")
-#   }
+#     if (i==1) {
+#       cat("-----------------------------------------------", "\n")
+#    #   cat("-----------------------------------------------", "\n")
+#       cat("i=" ,i, "\n")
+#       cat("time[,i]" ,time[,i], "\n")
+#       cat("delta[,i]" ,delta[,i], "\n")
+#       cat("trt[i]" ,trt[i], "\n")
+#       cat("nunique0=" ,nunique0, "\n")
+#       cat("nunique1=" ,nunique1, "\n")
+#       cat("nunique2=" ,nunique2, "\n")
+# #      cat("trans_prob[1,1,]" ,trans_prob[1,1,], "\n")
+# #      cat("trans_prob[1,2,]" ,trans_prob[1,2,], "\n")
+# #      cat("trans_prob[1,3,]" ,trans_prob[1,3,], "\n")
+# #      cat("trans_prob[2,2,]" ,trans_prob[2,2,], "\n")
+# #      cat("trans_prob[2,3,]" ,trans_prob[2,3,], "\n")
+# #      cat("trans_prob[3,3,]" ,trans_prob[3,3,], "\n")
+#      cat("-----------------------------------------------", "\n")
+#    }
 
     # Set jmax
     jmax <- 0
@@ -306,21 +318,25 @@ EWTPR <- function(n,m,nunique2,maxfollow2,untimes2,Time,Delta,dist2,markov_ind,c
     # Set jsamemark
     #if (trt[i]==1) {jsamemark=nunique1-1}
     #if (trt[i]==0) {jsamemark=nunique0-1}
-    jsamemark=min(nunique0,nunique1)
+    jsamemark=min(min(nunique0,nunique1),nunique2)-1
     if (jsamemark == nunique2) {jsamemark=nunique2-1}
+
+    # Enforce comparison ends at jsamemark
+    jmax=min(jmax,jsamemark)
+
     if (jsamemark < jmax) {jsamemark=jmax}
 
 
-    #if (i==13) {
-      # cat('i=',i,'\n')
-      # cat('jmax=',jmax,'\n')
-      # cat('jfinalmark=',jfinalmark,'\n')
-      # cat('jsamemark=',jsamemark,'\n')
-      # cat('nunique0=',nunique0,'\n')
-      # cat('length(new_conkm[1,])=',length(new_conkm[1,]),'\n')
-      # cat('time[,i]=',time[,i],'\n')
-      # cat('delta[,i]=',delta[,i],'\n')
-   #}
+   #  if (i==1) {
+   #     cat('i=',i,'\n')
+   #     cat('jmax=',jmax,'\n')
+   #    # cat('jfinalmark=',jfinalmark,'\n')
+   #     cat('jsamemark=',jsamemark,'\n')
+   #    # cat('nunique0=',nunique0,'\n')
+   #    # cat('length(new_conkm[1,])=',length(new_conkm[1,]),'\n')
+   #    # cat('time[,i]=',time[,i],'\n')
+   #    # cat('delta[,i]=',delta[,i],'\n')
+   # }
 
     state=0
     if (jmax != 0) {
@@ -380,26 +396,26 @@ EWTPR <- function(n,m,nunique2,maxfollow2,untimes2,Time,Delta,dist2,markov_ind,c
     }
     new_state_dist=state_dist
 
-    # if (i==13) {
-    #   cat('After jmax','\n')
-    #   cat('ewtpr before redistribution=',ewtpr[i],'\n')
-    #   cat('state=',state,'\n')
-    #   cat('state_dist=',state_dist,'\n')
-    #   # cat('comkm[,36]=',comkm[,36],'\n')
-    #   # cat('comkm[,37]=',comkm[,37],'\n')
-    # }
+    #  if (i==1) {
+    #    cat('After jmax','\n')
+    #    cat('ewtpr before redistribution=',ewtpr[i],'\n')
+    # #   cat('state=',state,'\n')
+    # #   cat('state_dist=',state_dist,'\n')
+    # #   # cat('comkm[,36]=',comkm[,36],'\n')
+    # #   # cat('comkm[,37]=',comkm[,37],'\n')
+    #  }
 
 # Start Redistribution-to-the-right using same arm
 
     if (jmax < jsamemark) {
     for (j in (jmax+1):jsamemark) {
 
-       # if (i==13 & j==103) {
-       #   cat('j> jmax=',j,'\n')
-       #   cat('iran=',iran,'\n')
-       #   cat('untimes2[j]=',untimes2[j],'\n')
-       #   cat('untimes2[j+1]=',untimes2[j+1],'\n')
-       # }
+       #  if (i==1) {
+       #    cat('j> jmax=',j,'\n')
+       # #   cat('iran=',iran,'\n')
+       #    cat('untimes2[j]=',untimes2[j],'\n')
+       #    cat('untimes2[j+1]=',untimes2[j+1],'\n')
+       #  }
 
 # Update state_dist
       if (markov_ind == 0) {
@@ -578,11 +594,11 @@ EWTPR <- function(n,m,nunique2,maxfollow2,untimes2,Time,Delta,dist2,markov_ind,c
       #END State Dist Update
 
 
-     # if (i==13 & j==103) {
-     #   cat(' Before randomness new state_dist=',state_dist,'\n')
-     #   cat(' iran=',iran,'\n')
-     #   cat(' random=',random[iran],'\n')
-     # }
+      # if (i==1 & j==65) {
+      #   cat(' Before randomness new state_dist=',state_dist,'\n')
+      #   cat(' iran=',iran,'\n')
+      #   cat(' random=',random[iran],'\n')
+      # }
 
 #
 # Use Randomness to determine a state
@@ -591,13 +607,14 @@ EWTPR <- function(n,m,nunique2,maxfollow2,untimes2,Time,Delta,dist2,markov_ind,c
       for (k in 1:(m+1)) {
 
         if (runif(1) < sum | k==m+1) {
+        # FOR COMPARISON WITH FORTRAN
         #if (random[iran] < sum | k==m+1) {
           state_dist[1:(m+1)]=0
           state_dist[k]=1
-          #iran=iran+1
+        #  iran=iran+1
           break
         #} else {
-          #iran=iran+1
+        #  iran=iran+1
         }
         sum=sum+state_dist[k+1]
       }
@@ -637,16 +654,16 @@ EWTPR <- function(n,m,nunique2,maxfollow2,untimes2,Time,Delta,dist2,markov_ind,c
         sum1=sum1-dist2[k-1,j]
       }
 
-      # if (i==13 & j==103) {
-      #   cat('After update j>jmax=',j,'\n')
-      #   cat('ewtpr[i]=',ewtpr[i],'\n')
-      #   cat('state_dist=',state_dist,'\n')
-      #   cat("untimes2[j]" ,untimes2[j], "\n")
-      #   cat("untimes2[j+1]" ,untimes2[j+1], "\n")
-      #   cat('dist2[,j]=','\n')
-      #   print(dist2[,j])
-      #   cat("-----------------------------------------------", "\n")
-      # }
+      #  if (i==1) {
+      #    cat('After update j>jmax=',j,'\n')
+      #    cat('ewtpr[i]=',ewtpr[i],'\n')
+      #    cat('state_dist=',state_dist,'\n')
+      # #   cat("untimes2[j]" ,untimes2[j], "\n")
+      # #   cat("untimes2[j+1]" ,untimes2[j+1], "\n")
+      # #   cat('dist2[,j]=','\n')
+      # #   print(dist2[,j])
+      #    cat("-----------------------------------------------", "\n")
+      #  }
     }
     }
 # End Redistribution-to-the-right using same arm
@@ -662,139 +679,139 @@ EWTPR <- function(n,m,nunique2,maxfollow2,untimes2,Time,Delta,dist2,markov_ind,c
 
 # Start Redistribution-to-the-right using combined arms
 
-    if (jsamemark < jfinalmark) {
-      for (j in (jsamemark+1):jfinalmark) {
-
-         # if (i==13 & j>90 & j<120) {
-         #   cat('j> jsamemark=',j,'\n')
-         #   cat('iran=',iran,'\n')
-         # }
-
-        # Update state_dist
-        if (markov_ind == 0) {
-
-          # KM Model
-
-          sum=state_dist[1]
-            # if (i==20 & j==37) {
-            #   cat('sum=',sum,'\n')
-            # }
-
-          if (j !=1) {
-            for (k in 1:m) {
-              if (comkm[k,j-1] != 0) {
-                new_state_dist[k]=sum*comkm[k,j]/comkm[k,j-1]
-                sum=sum+state_dist[k]
-              } else {
-                new_state_dist[k]=sum*comkm[k,j]
-                sum=sum+state_dist[k]
-              }
-            }
-          } else {
-            for (k in 1:m) {
-              new_state_dist[k]=sum*comkm[k,j]
-              sum=sum+state_dist[k]
-            }
-          }
-          # Enforce monitonicity
-          for (k in 2:m) {
-            if (new_state_dist[k] < new_state_dist[k-1]) {new_state_dist[k]=new_state_dist[k-1]}
-          }
-          for (k in 1:(m+1)) {
-            if (k==m+1) {
-              state_dist[k]=1-new_state_dist[m]
-            } else {
-              if (k==1) {
-                state_dist[k]=new_state_dist[1]
-              } else {
-                state_dist[k]=new_state_dist[k]-new_state_dist[k-1]
-              }
-            }
-          }
-        } else {
-        # Markov Model
-
-          trans_out <- array(data=0,dim=c(m))
-          for (l in 1:m) {
-            for (k in l:m) {
-                #           if (i==1) {
-                #             cat('trans_out[l] calculation for l=',l,' with k=',k,'\n')
-                #           }
-              trans_out[l]=trans_out[l]+trans_prob2[l,k,j]
-            }
-          }
-          trans_in <- array(data=0,dim=c(m,m))
-          for (l in 1:m) {
-            for (k in 1:l) {
-                #            if (i==1) {
-                #              cat('trans_in[l] calculation for l=',l,' with k=',k,'\n')
-                #            }
-              trans_in[k,l]=trans_in[k,l]+trans_prob2[k,l,j]
-            }
-          }
-
-            #        if (i==1) {
-            #          cat(' trans_in=',trans_in,'\n')
-            #          cat(' trans_out=',trans_out,'\n')
-            #        }
-
-
-          for (k in 1:(m+1)) {
-            if (k <= m) {
-               new_state_dist[k]=state_dist[k]*(1-trans_out[k])
-            } else {
-               new_state_dist[k]=state_dist[k]
-             }
-            if (k > 1) {
-              for (l in 1:(k-1)) {
-                new_state_dist[k]=new_state_dist[k]+state_dist[l]*trans_in[l,k-1]
-              }
-            }
-          }
-          state_dist=new_state_dist
-
-        }
-        #END State Dist Update
-
-
-        #      if (i==1) {
-        #        cat(' new state_dist=',state_dist,'\n')
-        #      }
-
-        #
-        # Use Randomness to determine a state
-        #
-        sum=state_dist[1]
-        for (k in 1:(m+1)) {
-          if (runif(1) < sum | k==m+1) {
-          #if (random[iran] < sum | k==m+1) {
-            state_dist[1:(m+1)]=0
-            state_dist[k]=1
-            #iran=iran+1
-            break
-          #} else {
-            #iran=iran+1
-          }
-          sum=sum+state_dist[k+1]
-        }
-
-        # Update EWTPR for Wins
-        sum1=sum(dist2[2:(m+1),j])
-        for (k in 1:m) {
-          ewtpr[i] <- ewtpr[i] + state_dist[k] * sum1 * (untimes2[j+1] - untimes2[j])
-          sum1=sum1-dist2[k+1,j]
-          for (l in (k+1):(m+1)) {
-            ewtpr_components[l-1,i] <- ewtpr_components[l-1,i] + state_dist[k] * dist2[l,j] * (untimes2[j+1]-untimes2[j])
-          }
-        }
-
-        # Update EWTPR for Losses
-        sum1=sum(dist2[1:m,j])
-        for (k in (m+1):2) {
-          ewtpr[i] <- ewtpr[i] - state_dist[k] * sum1 * (untimes2[j+1] - untimes2[j])
-          ewtpr_components[k-1,i] <- ewtpr_components[k-1,i] - state_dist[k] * sum1 * (untimes2[j+1]-untimes2[j])
-          sum1=sum1-dist2[k-1,j]
-        }
+    # if (jsamemark < jfinalmark) {
+    #   for (j in (jsamemark+1):jfinalmark) {
+    #
+    #      # if (i==13 & j>90 & j<120) {
+    #      #   cat('j> jsamemark=',j,'\n')
+    #      #   cat('iran=',iran,'\n')
+    #      # }
+    #
+    #     # Update state_dist
+    #     if (markov_ind == 0) {
+    #
+    #       # KM Model
+    #
+    #       sum=state_dist[1]
+    #         # if (i==20 & j==37) {
+    #         #   cat('sum=',sum,'\n')
+    #         # }
+    #
+    #       if (j !=1) {
+    #         for (k in 1:m) {
+    #           if (comkm[k,j-1] != 0) {
+    #             new_state_dist[k]=sum*comkm[k,j]/comkm[k,j-1]
+    #             sum=sum+state_dist[k]
+    #           } else {
+    #             new_state_dist[k]=sum*comkm[k,j]
+    #             sum=sum+state_dist[k]
+    #           }
+    #         }
+    #       } else {
+    #         for (k in 1:m) {
+    #           new_state_dist[k]=sum*comkm[k,j]
+    #           sum=sum+state_dist[k]
+    #         }
+    #       }
+    #       # Enforce monitonicity
+    #       for (k in 2:m) {
+    #         if (new_state_dist[k] < new_state_dist[k-1]) {new_state_dist[k]=new_state_dist[k-1]}
+    #       }
+    #       for (k in 1:(m+1)) {
+    #         if (k==m+1) {
+    #           state_dist[k]=1-new_state_dist[m]
+    #         } else {
+    #           if (k==1) {
+    #             state_dist[k]=new_state_dist[1]
+    #           } else {
+    #             state_dist[k]=new_state_dist[k]-new_state_dist[k-1]
+    #           }
+    #         }
+    #       }
+    #     } else {
+    #     # Markov Model
+    #
+    #       trans_out <- array(data=0,dim=c(m))
+    #       for (l in 1:m) {
+    #         for (k in l:m) {
+    #             #           if (i==1) {
+    #             #             cat('trans_out[l] calculation for l=',l,' with k=',k,'\n')
+    #             #           }
+    #           trans_out[l]=trans_out[l]+trans_prob2[l,k,j]
+    #         }
+    #       }
+    #       trans_in <- array(data=0,dim=c(m,m))
+    #       for (l in 1:m) {
+    #         for (k in 1:l) {
+    #             #            if (i==1) {
+    #             #              cat('trans_in[l] calculation for l=',l,' with k=',k,'\n')
+    #             #            }
+    #           trans_in[k,l]=trans_in[k,l]+trans_prob2[k,l,j]
+    #         }
+    #       }
+    #
+    #         #        if (i==1) {
+    #         #          cat(' trans_in=',trans_in,'\n')
+    #         #          cat(' trans_out=',trans_out,'\n')
+    #         #        }
+    #
+    #
+    #       for (k in 1:(m+1)) {
+    #         if (k <= m) {
+    #            new_state_dist[k]=state_dist[k]*(1-trans_out[k])
+    #         } else {
+    #            new_state_dist[k]=state_dist[k]
+    #          }
+    #         if (k > 1) {
+    #           for (l in 1:(k-1)) {
+    #             new_state_dist[k]=new_state_dist[k]+state_dist[l]*trans_in[l,k-1]
+    #           }
+    #         }
+    #       }
+    #       state_dist=new_state_dist
+    #
+    #     }
+    #     #END State Dist Update
+    #
+    #
+    #     #      if (i==1) {
+    #     #        cat(' new state_dist=',state_dist,'\n')
+    #     #      }
+    #
+    #     #
+    #     # Use Randomness to determine a state
+    #     #
+    #     sum=state_dist[1]
+    #     for (k in 1:(m+1)) {
+    #       if (runif(1) < sum | k==m+1) {
+    #       #if (random[iran] < sum | k==m+1) {
+    #         state_dist[1:(m+1)]=0
+    #         state_dist[k]=1
+    #         #iran=iran+1
+    #         break
+    #       #} else {
+    #         #iran=iran+1
+    #       }
+    #       sum=sum+state_dist[k+1]
+    #     }
+    #
+    #     # Update EWTPR for Wins
+    #     sum1=sum(dist2[2:(m+1),j])
+    #     for (k in 1:m) {
+    #       ewtpr[i] <- ewtpr[i] + state_dist[k] * sum1 * (untimes2[j+1] - untimes2[j])
+    #       sum1=sum1-dist2[k+1,j]
+    #       for (l in (k+1):(m+1)) {
+    #         ewtpr_components[l-1,i] <- ewtpr_components[l-1,i] + state_dist[k] * dist2[l,j] * (untimes2[j+1]-untimes2[j])
+    #       }
+    #     }
+    #
+    #     # Update EWTPR for Losses
+    #     sum1=sum(dist2[1:m,j])
+    #     for (k in (m+1):2) {
+    #       ewtpr[i] <- ewtpr[i] - state_dist[k] * sum1 * (untimes2[j+1] - untimes2[j])
+    #       ewtpr_components[k-1,i] <- ewtpr_components[k-1,i] - state_dist[k] * sum1 * (untimes2[j+1]-untimes2[j])
+    #       sum1=sum1-dist2[k-1,j]
+    #     }
 
          # if (i==13 & j>90 & j<120) {
          #   cat('After update','\n')
@@ -805,17 +822,20 @@ EWTPR <- function(n,m,nunique2,maxfollow2,untimes2,Time,Delta,dist2,markov_ind,c
          #   cat('dist2[,j]=','\n')
          #   print(dist2[,j])
          #   cat("-----------------------------------------------", "\n")
-         # }
-      }
-    }
+    #      # }
+    #   }
+    # }
     # End Redistribution-to-the-right using combined arms
 
   }
 # END LOOP OVER SUBJECTS
 
-  # cat('----------------------------------------------------','\n')
-  # cat('ewtpr=','\n')
-  # print(ewtpr)
+   # cat('----------------------------------------------------','\n')
+   # cat('ewd=','\n')
+   # print(ewtpr[1:10])
+   # cat('trt=','\n')
+   # print(trt[1:10])
+
   #cat('trt=','\n')
   #print(trt)
   #cat('covariate=','\n')
@@ -857,10 +877,22 @@ EWTPR <- function(n,m,nunique2,maxfollow2,untimes2,Time,Delta,dist2,markov_ind,c
   ewtpr_est=mean(ewtpr_time)
   ewtpr_var_est=mean(ewtpr_time_var)+((nimp+1)/nimp)*var(ewtpr_time)
   z_ewtpr <- ewtpr_est/sqrt(ewtpr_var_est)
+
+  #cat('----------------------------------------------------','\n')
+  #cat('imp_components=','\n')
+  #print(imp_components)
+  #cat('----------------------------------------------------','\n')
+
   for (k in 1:m) {
     components[k] <- mean(imp_components[k,])
     components_var[k] <- mean(imp_components_var[k,])+((nimp+1)/nimp)*var(imp_components[k,])
   }
+
+  #cat('----------------------------------------------------','\n')
+  #cat('components=','\n')
+  #print(components)
+  #cat('----------------------------------------------------','\n')
+
 
   return(list(ewtpr_est,ewtpr_var_est,z_ewtpr,components,components_var))
 }
