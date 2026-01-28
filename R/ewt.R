@@ -31,7 +31,7 @@ EWT <- function(m,dist_state0,dist_state1,unique_event_times0,unique_event_times
         new_dist_state1[event_num,i] <- dist_state1[event_num,x]
       }
       else {
-        new_dist_state1[event_num,i] <- 1
+        if (event_num==1) {new_dist_state1[event_num,i] <- 1}
       }
     }
     i <- i + 1

@@ -212,7 +212,7 @@ wintime <- function(type,Time,Delta,trt,cov = NULL,model = NULL,resample = NULL,
     }
     # If no model is specified, use the default (KM) model
     if (model == "km") {
-#      cat('call km','\n')
+      #cat('call km','\n')
       z <- km(n0,n1,m,Time,Delta)
     }
   }
@@ -237,8 +237,26 @@ wintime <- function(type,Time,Delta,trt,cov = NULL,model = NULL,resample = NULL,
       comkm <- z[[13]]
       trtkm <- z[[14]]
       conkm <- z[[15]]
-#      cat('km was fit','\n')
-#      cat('conkm=',conkm,'\n')
+
+      #cat('km was fit','\n')
+      #cat('----------------------------------','\n')
+      #cat('nuntimes0=',nuntimes0,'\n')
+      #cat('untimes0=',untimes0,'\n')
+      #cat('dim(conkm)=',dim(conkm),'\n')
+      #cat('conkm=','\n')
+      #print(conkm)
+      #cat('dist_state0=','\n')
+      #print(dist_state0)
+      #cat('----------------------------------','\n')
+      #cat('nuntimes1=',nuntimes1,'\n')
+      #cat('untimes1=',untimes1,'\n')
+      #cat('dim(trtkm)=',dim(trtkm),'\n')
+      #cat('trtkm=','\n')
+      #print(trtkm)
+      #cat('dist_state1=','\n')
+      #print(dist_state1)
+      #cat('----------------------------------','\n')
+
       trans_prob2 <- array(data=0,dim=c(m,m,nuntimes2))
       trans_prob1 <- array(data=0,dim=c(m,m,nuntimes1))
       trans_prob0 <- array(data=0,dim=c(m,m,nuntimes0))
@@ -259,10 +277,10 @@ wintime <- function(type,Time,Delta,trt,cov = NULL,model = NULL,resample = NULL,
     z_rewtpr <- 0
   }
 #   cat('----------------------------------------------','\n')
-#   cat('----------------------------------------------','\n')
-#   cat('nuntimes2=',nuntimes2,'\n')
-#   cat('untimes2=',untimes2,'\n')
-#   cat('----------------------------------------------','\n')
+   # cat('----------------------------------------------','\n')
+   # cat('nuntimes2=',nuntimes2,'\n')
+   # cat('untimes2=',untimes2,'\n')
+   # cat('----------------------------------------------','\n')
 
   #cat('type function calls','\n')
   # --------------------------

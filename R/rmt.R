@@ -25,6 +25,11 @@ RMT <- function(m,time_restriction,dist_state0,dist_state1,unique_event_times0,u
   nunique_event_times=length(unique_event_times)
   new_dist_state1 <- matrix(data=0,nrow=m+1,ncol=nunique_event_times)
 
+  #cat("after initiation new_dist_state1=","\n")
+  #print(new_dist_state1)
+  #    cat("event_num=",event_num,"\n")
+  #    if (event_num==1) {new_dist_state1[event_num,i] <- 1}
+
   # Loop 1
   i <- 1
   while(i <= nunique_event_times) {
@@ -34,11 +39,15 @@ RMT <- function(m,time_restriction,dist_state0,dist_state1,unique_event_times0,u
         new_dist_state1[event_num,i] <- dist_state1[event_num,x]
       }
       else {
-        new_dist_state1[event_num,i] <- 1
+        if (event_num==1) {new_dist_state1[event_num,i] <- 1}
+
       }
     }
     i <- i + 1
   }
+
+  #cat("after inital loop new_dist_state1=","\n")
+  #print(new_dist_state1)
 
   # Loop 2
 
@@ -106,7 +115,12 @@ RMT <- function(m,time_restriction,dist_state0,dist_state1,unique_event_times0,u
   # RESTRICT LIST TO SMALLER OF MAX FOLLOW-UPS FOR ARMS
   nunique_event_times=length(unique_event_times[unique_event_times <= unique_event_times1[nunique_event_times1]])
 
-#  cat(" updated nunique_event_times=",nunique_event_times,"\n")
+  #cat(" updated nunique_event_times=",nunique_event_times,"\n")
+  #cat(" updated unique_event_times=",unique_event_times,"\n")
+  #cat("dist_state0=","\n")
+  #print(dist_state0)
+  #cat("new_dist_state1=","\n")
+  #print(new_dist_state1)
 
   rmst_time <- 0
   j <- 1

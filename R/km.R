@@ -90,6 +90,11 @@ km <- function(n0,n1,m,Time,Delta) {
   time_km <- result[[1]]
   delta_km <- result[[2]]
 
+  # cat('----------------------------------------------------','\n')
+  # cat('From km: time_km=','\n')
+  # print(time_km)
+  # cat('----------------------------------------------------','\n')
+
   #---------------------------------------------------------------------
   # CONTROL GROUP
   #
@@ -456,12 +461,13 @@ km <- function(n0,n1,m,Time,Delta) {
   unique_event_times2=unique_event_times2[1:nunique_event_times2]
   dist_state2=dist_state2[1:(m+1),1:nunique_event_times2]
   comkm=comkm[1:m,1:nunique_event_times2]
-#  cat('----------------------------------------------------','\n')
-#  cat('nunique_event_times2=',nunique_event_times2,'\n')
-#  cat('unique_event_times2=',unique_event_times2,'\n')
-#  cat('dist_state2=','\n')
-#  print(dist_state2)
-#  cat('----------------------------------------------------','\n')
+
+  # cat('----------------------------------------------------','\n')
+  # cat('From km: nunique_event_times2=',nunique_event_times2,'\n')
+  # cat('From km: unique_event_times2=',unique_event_times2,'\n')
+  # cat('From km: dist_state2=','\n')
+  # print(dist_state2)
+  # cat('----------------------------------------------------','\n')
 
   return(list(dist_state0 = dist_state0,dist_state1 = dist_state1,unique_event_times0 = unique_event_times0,unique_event_times1 = unique_event_times1,
               nunique_event_times0 = nunique_event_times0,nunique_event_times1 = nunique_event_times1,max_follow0 = max_follow0,max_follow1 = max_follow1,

@@ -35,6 +35,8 @@ EWTP <- function(n,m,nunique,maxfollow,untimes,Time,Delta,dist,markov_ind,cov,tr
 
   # Start main loop
   for (i in 1:n) {
+    # cat('---------------------------','\n')
+    # cat('Main loop subject i=',i,'\n')
     # Create temp variables
     tnunique <- nunique
     for (j in 1:nunique) {
@@ -47,6 +49,8 @@ EWTP <- function(n,m,nunique,maxfollow,untimes,Time,Delta,dist,markov_ind,cov,tr
         tdist[event,t] <- dist[event,t]
       }
     }
+    #cat('Before adding subject i times, tuntimes=','\n')
+    #print(tuntimes)
 
     # Create addtime matrix
     addtime <- matrix(data=NA,nrow=m,ncol=n)
@@ -93,6 +97,17 @@ EWTP <- function(n,m,nunique,maxfollow,untimes,Time,Delta,dist,markov_ind,cov,tr
         }
       }
     }
+
+    # cat('After adding person i times: tuntimes==','\n')
+    # cat('tuntimes=','\n')
+    # print(tuntimes)
+    # cat('tdist[1,]=','\n')
+    # print(tdist[1,])
+    # cat('tdist[2,]=','\n')
+    # print(tdist[2,])
+    # cat('tdist[3,]=','\n')
+    # print(tdist[3,])
+
 
     # Set jmax
     jmax <- 0
