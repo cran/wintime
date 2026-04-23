@@ -19,7 +19,8 @@
 #' @return A list containing: the observed treatment effect, a vector of length `resample_num` containing resampled treatment effects, a message
 #' indicating the method ran and the type of resampling done, the variance, the p-value (one-sided for treatment benefit), the total wins on treatment (pairwise methods only),
 #' the total losses on treatment (pairwise methods only), a vector of length 'm' with the components of the treatment effect,
-#' a vector of length 'm' with the variance of the components. A warning message will be printed for combinations of `type` and `model`/`resample`
+#' a vector of length 'm' with the variance of the components, the maximum time used in the comparisons (for EWT, RMT, EWTP, REWTP, EWTPR, REWTPR).
+#' A warning message will be printed for combinations of `type` and `model`/`resample`
 #' that are not recommended.
 #' @details The type parameter specifies the procedure you would like to run.
 #' 'ewt' is Expected Win Time.
@@ -34,6 +35,52 @@
 #' 'rewtp' is Time Restricted Expected Win Time Against Trial Population.
 #' 'rewtpr'is Time Restricted Expected Win Time Against Trial Population With Redistribution.
 #' 'rpwt' is Time Restricted Pairwise Win Time.
+#'
+#' The maximum time used in comparisons for EWT, RMT, EWTP, REWTP, EWTPR, and REWTPR are defined below.
+#'
+#' First define separately for each arm the maximum valid time for estimating the multi-state distribution
+#' (max_valid_time0 and max_valid_time1) from either a Markov or KM model as follows.
+#' max_valid_time0 is the smallest time for the control arm when the estimated multi-state distribution has a
+#' positive probability of a state but there is nobody still at-risk in that state (If this never occurs
+#' then max_valid_time0 is defined to be the largest event time of the control arm (max_time0)).
+#' max_valid_time1 is the smallest time for the treatment arm when the estimated multi-state distribution has a
+#' positive probability of a state but there is nobody still at-risk in that state (If this never occurs
+#' then max_valid_time1 is defined to be the largest event time of the treatment arm(max_time1)).
+#' Also define the maximum valid time for the combined arms for estimating the multi-state distribution
+#' (max_valid_time2) from either a Markov or KM model as follows.
+#' max_valid_time2 is the smallest time for the combined arms when the estimated multi-state distribution has a
+#' positive probability of a state but there is nobody still at-risk in that state (If this never occurs
+#' then max_valid_time2 is defined to be the largest event time of the combined arms (max_time2)).
+#'
+#' EWT: There are two cases:
+#' (1) the arm with the smaller maximum valid time has an estimated multi-state distribution that is degenerate
+#' in the absorbing (highest) state at that time.
+#' (2) the arm with the smaller maximum valid time has an estimated multi-state distribution that is not degenerate
+#' in the absorbing (highest) state at that time.
+#' For case (1) the maximum time used in comparison is the max(max_valid_time0,max_valid_time1).
+#' For case (2) the maximum time used in comparison is the min(max_valid_time0,max_valid_time1).
+#'
+#' RMT: the maximum time used in comparison is min(the maximum time used in comparison for EWT, time_restriction).
+#'
+#' EWTP: There are two cases:
+#' (1) the combined arms have an estimated multi-state distribution that is degenerate in the absorbing (highest) state
+#' at max_valid_time2.
+#' (2) the combined arms have an estimated multi-state distribution that is not degenerate in the absorbing (highest) state
+#' at max_valid_time2.
+#' For case (1) the maximum time used in comparison is the max(max_valid_time2,max_time2).
+#' For case (2) the maximum time used in comparison is the min(max_valid_time2,max_time2).
+#'
+#' REWTP: the maximum time used in comparison is min(the maximum time used in comparison for EWTP, time_restriction).
+#'
+#' EWTPR: There are 8 cases based on which of the three (control arm, treatment arm, combined arms) estimated multi-state
+#' distributions are degenerate in the absorbing (highest) state at the maximum valid time.
+#' The maximum time used in comparison is the minimum of the max_valid_times over the arms (control, treatment, combined)
+#' that do not have degenerate estimated multi-state distibutions in the absorbing (highest) state at the maximum valid time
+#' (If all have a degenerate estimated multi-state distibutions in the absorbing (highest) state at the maximum valid time
+#' the maximum time used in comparison is defined as the maximum of the three max_valid_times).
+#'
+#'REWTPR: the maximum time used in comparison is min(the maximum time used in comparison for EWTPR, time_restriction).
+#'
 #' @examples
 #' # ------------------------------
 #' # Example Inputs
@@ -96,7 +143,7 @@
 # ---------------------------------------------
 # Main calling function
 # ---------------------------------------------
-wintime <- function(type,Time,Delta,trt,cov = NULL,model = NULL,resample = NULL,resample_num = 0,time_restriction = NA,seed = NA,nimp = 0) {
+wintime <- function(type,Time,Delta,trt,cov = NULL,model = NULL,resample = NULL,resample_num = 0,time_restriction = NA,seed = NA,nimp = 1) {
 #  cat('Wintime called with model=',model,'\n')
   # -------------------------------
   # Validate inputs
@@ -197,7 +244,7 @@ wintime <- function(type,Time,Delta,trt,cov = NULL,model = NULL,resample = NULL,
     }
   }
 
-#  cat('fit model','\n')
+  #cat('fit model','\n')
   # ---------------------------
   # Fit model
   # ---------------------------
@@ -212,7 +259,14 @@ wintime <- function(type,Time,Delta,trt,cov = NULL,model = NULL,resample = NULL,
     }
     # If no model is specified, use the default (KM) model
     if (model == "km") {
-      #cat('call km','\n')
+      # cat('call km','\n')
+      # cat('call n0=',n0,'\n')
+      # cat('call n1=',n1,'\n')
+      # cat('call m=',m,'\n')
+      # cat('Time=','\n')
+      # print(Time)
+      # cat('Delta=','\n')
+      # print(Delta)
       z <- km(n0,n1,m,Time,Delta)
     }
   }
@@ -274,15 +328,17 @@ wintime <- function(type,Time,Delta,trt,cov = NULL,model = NULL,resample = NULL,
     z_ewtp <- 0
     z_rewtp <- 0
     z_ewtpr <- 0
-    z_rewtpr <- 0
+    # z_rewtpr <- 0
   }
-#   cat('----------------------------------------------','\n')
    # cat('----------------------------------------------','\n')
-   # cat('nuntimes2=',nuntimes2,'\n')
-   # cat('untimes2=',untimes2,'\n')
+   # cat('----------------------------------------------','\n')
+   # cat('From MAIN:max_follow0=',max_follow0,'\n')
+   # cat('nuntimes0=',nuntimes0,'\n')
+   # cat('untimes0=',untimes0,'\n')
    # cat('----------------------------------------------','\n')
 
-  #cat('type function calls','\n')
+   # cat('type function calls','\n')
+   # cat('type=',type,'\n')
   # --------------------------
   # Type function calls
   # --------------------------
@@ -291,36 +347,43 @@ wintime <- function(type,Time,Delta,trt,cov = NULL,model = NULL,resample = NULL,
   losses <- NA
   components <- rep(NA,m)
   components_var <- rep(NA,m)
+  max_time <- rep(NA,m)
 
   if (type == "ewt") {
     obs_data <- EWT(m,dist_state0,dist_state1,untimes0,untimes1,nuntimes0,nuntimes1)
+    max_time <- obs_data[[3]]
   }
   else if (type == "ewtr") {
     obs_data <- EWTR(n,m,nuntimes0,max_follow0,untimes0,Time,Delta,dist_state0,markov_ind,cov,trt)
   }
   else if (type == "ewtp") {
     obs_data <- EWTP(n,m,nuntimes2,max_follow2,untimes2,Time,Delta,dist_state2,markov_ind,cov,trt)
+    max_time <- obs_data[[6]]
   }
   else if (type == "rewtp") {
     if (is.na(time_restriction)) {
       stop(paste("Please provide the time_restriction argument for this method."))
     }
     obs_data <- REWTP(n,m,nuntimes2,max_follow2,untimes2,Time,Delta,dist_state2,markov_ind,cov,trt,time_restriction)
+    max_time <- obs_data[[6]]
   }
   else if (type == "ewtpr") {
     obs_data <- EWTPR(n,m,nuntimes2,max_follow2,untimes2,Time,Delta,dist_state2,markov_ind,cov,trt,comkm,trans_prob2,nuntimes1,max_follow1,untimes1,dist_state1,trtkm,trans_prob1,nuntimes0,max_follow0,untimes0,dist_state0,conkm,trans_prob0,nimp)
+    max_time <- obs_data[[6]]
   }
   else if (type == "rewtpr") {
     if (is.na(time_restriction)) {
       stop(paste("Please provide the time_restriction argument for this method."))
     }
     obs_data <- REWTPR(n,m,nuntimes2,max_follow2,untimes2,Time,Delta,dist_state2,markov_ind,cov,trt,comkm,trans_prob2,time_restriction,nuntimes1,max_follow1,untimes1,dist_state1,trtkm,trans_prob1,nuntimes0,max_follow0,untimes0,dist_state0,conkm,trans_prob0,nimp)
+    max_time <- obs_data[[6]]
   }
   else if (type == "rmt") {
     if (is.na(time_restriction)) {
       stop(paste("Please provide the time_restriction argument for this method."))
     }
     obs_data <- RMT(m,time_restriction,dist_state0,dist_state1,untimes0,untimes1,nuntimes0,nuntimes1)
+    max_time <- obs_data[[3]]
   }
   else if (type == "wtr") {
 #    cat('call WTR for obs data','\n')
@@ -464,16 +527,16 @@ wintime <- function(type,Time,Delta,trt,cov = NULL,model = NULL,resample = NULL,
   # Warning message for certain combinations of type and model/resampling method
   # ---------------------------------------------------------------------------------------------------
   if ((type %in% c("ewt","rmt")) && (model == "markov" || (resample %in% c("boot","bootstrap")))) {
-    warning_message <- warning("For this method, it is strongly recommended to use a KM model and to resample using permutations. These are set as defaults.")
+    warning_message <- warning("For this method, it is recommended to use a KM model and to resample using permutations. These are set as defaults.")
   }
   if ((type %in% c("ewtr","ewtpr","rewtpr")) && model == "km") {
-    warning_message <- warning("For this method, it is strongly recommended to use a Markov model. This is set as a default.")
+    warning_message <- warning("Results with a KM model are meaningless! For this method, you must use a Markov model. This is set as a default.")
   }
   if (type %in% c("wtr","rwtr","pwt","rpwt") && resample %in% c("perm","perms","permutation","permutations")) {
-    warning_message <- warning("For this method, it is strongly recommended to resample using bootstraps. This is set as a default.")
+    warning_message <- warning("For this method, it is recommended to resample using bootstraps. This is set as a default.")
   }
   if (type == "max" && (model == "km" || resample %in% c("perm","perms","permutation","permutations"))) {
-    warning_message <- warning("For this method, it is strongly recommended to use a Markov model and to resample using bootstraps. These are set as defaults.")
+    warning_message <- warning("For this method, it is recommended to use a Markov model and to resample using bootstraps. These are set as defaults.")
   }
-    return(list(data = data, resample_data = resample_data, message = message, variance = variance, p = p, wins = wins, losses = losses, components=components, components_var=components_var))
+    return(list(trt_effect = data, resample_data = resample_data, message = message, variance = variance, p = p, wins = wins, losses = losses, components=components, components_var=components_var, max_time=max_time))
 }

@@ -41,62 +41,62 @@ test_that("wintime function works with valid inputs", {
   # Test 'ewt' method with default settings
   result <- wintime("ewt", Time, Delta, trt)
   expect_type(result, "list")
-  expect_named(result, c("data","resample_data","message","variance","p","wins","losses","components","components_var"))
+  expect_named(result, c("trt_effect","resample_data","message","variance","p","wins","losses","components","components_var","max_time"))
 
   # Test 'ewtr' method with default settings
   result <- wintime("ewtr", Time, Delta, trt, cov = cov)
   expect_type(result, "list")
-  expect_named(result, c("data","resample_data","message","variance","p","wins","losses","components","components_var"))
+  expect_named(result, c("trt_effect","resample_data","message","variance","p","wins","losses","components","components_var","max_time"))
 
   # Test 'rmt' method with default settings and 10 resamples
   result <- wintime("rmt", Time, Delta, trt, time_restriction = 365, resample_num = 10)
   expect_type(result, "list")
-  expect_named(result, c("data","resample_data","message","variance","p","wins","losses","components","components_var"))
+  expect_named(result, c("trt_effect","resample_data","message","variance","p","wins","losses","components","components_var","max_time"))
 
   # Test 'max' method with default settings and 10 resamples
   result <- wintime("max", Time, Delta, trt, resample_num = 10)
   expect_type(result, "list")
-  expect_named(result, c("data","resample_data","message","variance","p","wins","losses","components","components_var"))
+  expect_named(result, c("trt_effect","resample_data","message","variance","p","wins","losses","components","components_var","max_time"))
 
   # Test 'wtr' method with default settings
   result <- wintime("wtr", Time, Delta, trt)
   expect_type(result, "list")
-  expect_named(result, c("data","resample_data","message","variance","p","wins","losses","components","components_var"))
+  expect_named(result, c("trt_effect","resample_data","message","variance","p","wins","losses","components","components_var","max_time"))
 
   # Test 'rwtr' method with default settings and 5 resamples
   result <- wintime("rwtr", Time, Delta, trt, resample_num = 5)
   expect_type(result, "list")
-  expect_named(result, c("data","resample_data","message","variance","p","wins","losses","components","components_var"))
+  expect_named(result, c("trt_effect","resample_data","message","variance","p","wins","losses","components","components_var","max_time"))
 
   # Test 'pwt' method with default settings
   result <- wintime("pwt", Time, Delta, trt)
   expect_type(result, "list")
-  expect_named(result, c("data","resample_data","message","variance","p","wins","losses","components","components_var"))
+  expect_named(result, c("trt_effect","resample_data","message","variance","p","wins","losses","components","components_var","max_time"))
 
   # Test 'rpwt' method with default settings
   result <- wintime("rpwt", Time, Delta, trt, time_restriction = 365)
   expect_type(result, "list")
-  expect_named(result, c("data","resample_data","message","variance","p","wins","losses","components","components_var"))
+  expect_named(result, c("trt_effect","resample_data","message","variance","p","wins","losses","components","components_var","max_time"))
 
   # Test 'ewtp' method with default settings
   result <- wintime("ewtp", Time, Delta, trt)
   expect_type(result, "list")
-  expect_named(result, c("data","resample_data","message","variance","p","wins","losses","components","components_var"))
+  expect_named(result, c("trt_effect","resample_data","message","variance","p","wins","losses","components","components_var","max_time"))
 
   # Test 'rewtp' method with default settings
   result <- wintime("rewtp", Time, Delta, trt, time_restriction = 365)
   expect_type(result, "list")
-  expect_named(result, c("data","resample_data","message","variance","p","wins","losses","components","components_var"))
+  expect_named(result, c("trt_effect","resample_data","message","variance","p","wins","losses","components","components_var","max_time"))
 
   # Test 'ewtpr' method with default settings
   result <- wintime("ewtpr", Time, Delta, trt, nimp = 1)
   expect_type(result, "list")
-  expect_named(result, c("data","resample_data","message","variance","p","wins","losses","components","components_var"))
+  expect_named(result, c("trt_effect","resample_data","message","variance","p","wins","losses","components","components_var","max_time"))
 
   # Test 'rewtpr' method with default settings
   result <- wintime("rewtpr", Time, Delta, trt, time_restriction = 365, nimp = 1)
   expect_type(result, "list")
-  expect_named(result, c("data","resample_data","message","variance","p","wins","losses","components","components_var"))
+  expect_named(result, c("trt_effect","resample_data","message","variance","p","wins","losses","components","components_var","max_time"))
 })
 
 test_that("wintime function handles invalid inputs", {
@@ -129,8 +129,5 @@ test_that("wintime function handles edge cases", {
 
 test_that("wintime function handles warnings", {
   # Test warnings for 'ewt' with Markov model
-  expect_warning(result <- wintime("ewt", Time, Delta, trt, model = "markov"), "For this method, it is strongly recommended to use a KM model and to resample using permutations. These are set as defaults.")
-
-  # Test warnings for 'ewtr' with KM model
-  expect_warning(result <- wintime("ewtr", Time, Delta, trt, model = "km"), "For this method, it is strongly recommended to use a Markov model. This is set as a default.")
+  expect_warning(result <- wintime("ewt", Time, Delta, trt, model = "markov"), "For this method, it is recommended to use a KM model and to resample using permutations. These are set as defaults.")
 })

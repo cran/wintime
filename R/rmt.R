@@ -11,7 +11,7 @@
 #' @param unique_event_times1 A vector of unique treatment arm event times (days) (returned from wintime::km() or wintime::markov()).
 #' @param nunique_event_times0 The number of unique control arm event times (returned from wintime::km() or wintime::markov()).
 #' @param nunique_event_times1 The number of unique treatment arm event times (returned from wintime::km() or wintime::markov()).
-#' @return A list containing: The restricted mean survival in favor of the treatment arm, the components of the treatment effect.
+#' @return A list containing: The restricted mean survival in favor of the treatment arm, the components of the treatment effect, and the maximum time used in comparisons.
 
 
 # ---------------------------------------------------
@@ -24,6 +24,20 @@ RMT <- function(m,time_restriction,dist_state0,dist_state1,unique_event_times0,u
   unique_event_times=unique_event_times0
   nunique_event_times=length(unique_event_times)
   new_dist_state1 <- matrix(data=0,nrow=m+1,ncol=nunique_event_times)
+  max_time <- 0
+
+  max_follow0=unique_event_times0[nunique_event_times0]
+  max_follow1=unique_event_times1[nunique_event_times1]
+
+  # cat("unique_event_times0=","\n")
+  # print(unique_event_times0)
+  # cat("dist_state0=","\n")
+  # print(dist_state0)
+  # cat("unique_event_times1=","\n")
+  # print(unique_event_times1)
+  # cat("dist_state1=","\n")
+  # print(dist_state1)
+
 
   #cat("after initiation new_dist_state1=","\n")
   #print(new_dist_state1)
@@ -46,26 +60,32 @@ RMT <- function(m,time_restriction,dist_state0,dist_state1,unique_event_times0,u
     i <- i + 1
   }
 
-  #cat("after inital loop new_dist_state1=","\n")
-  #print(new_dist_state1)
+  # cat("after inital loop new_dist_state1=","\n")
+  # print(new_dist_state1)
 
   # Loop 2
 
   # ADD EVENT TIMES FOR TREATED SUBJECTS TO LIST FROM CONTROL SUBJECTS
   #
+  tdist_state0 <- matrix(data = 0, nrow = m+1, ncol = ncol(dist_state0))
+  #cat("dim tdist_state0 =", dim(tdist_state0), "\n")
+  tnew_dist_state1 <- matrix(data = 0, nrow = m+1, ncol = ncol(new_dist_state1))
   i=1
   #    while (i <= 1) {
   while (i <= nunique_event_times1) {
     #cat("loop 2 i =", i, "\n")
-    if (!(unique_event_times1[i] %in% unique_event_times) & unique_event_times1[i] <= unique_event_times[nunique_event_times]) {
-      #        cat('Enter ADD EVENT time to List','\n')
+    #cat("unique_event_times1[i] =",unique_event_times1[i], "\n")
+
+  #  if (!(unique_event_times1[i] %in% unique_event_times) & unique_event_times1[i] <= unique_event_times[nunique_event_times]) {
+    if (!(unique_event_times1[i] %in% unique_event_times)) {
+    #cat('Enter ADD EVENT time to List','\n')
       jstop=length(unique_event_times[unique_event_times < unique_event_times1[i]])
       jstar=jstop+1
       if (jstop==0) {jstop=1}
 
-      tdist_state0 <- matrix(data = 0, nrow = m+1, ncol = ncol(dist_state0)+1)
-      tnew_dist_state1 <- matrix(data = 0, nrow = m+1, ncol = ncol(new_dist_state1)+1)
-      # cat("dim tdist_state0 =", dim(tdist_state0), "\n")
+      tdist_state0 <- matrix(data = 0, nrow = m+1, ncol = ncol(tdist_state0)+1)
+      tnew_dist_state1 <- matrix(data = 0, nrow = m+1, ncol = ncol(tnew_dist_state1)+1)
+      #cat("dim tdist_state0 =", dim(tdist_state0), "\n")
 
 
 
@@ -99,11 +119,21 @@ RMT <- function(m,time_restriction,dist_state0,dist_state1,unique_event_times0,u
       perm=order(unique_event_times)
       unique_event_times=unique_event_times[perm]
       nunique_event_times=length(unique_event_times)
+      #cat("Updated # unique_event_times =",nunique_event_times,"\n")
+      #cat("Updated unique_event_times =","\n")
+      #print(unique_event_times)
     }
     i=i+1
   }
 
-#  cat("nunique_event_times=",nunique_event_times,"\n")
+  # cat("nunique_event_times=",nunique_event_times,"\n")
+  # cat("unique_event_times=","\n")
+  # print(unique_event_times)
+  # cat("dist_state0=","\n")
+  # print(dist_state0)
+  # cat("new_dist_state1=","\n")
+  # print(new_dist_state1)
+
 #  cat("unique_event_times=","\n")
 #  print(unique_event_times)
 #  cat("dist_state0=","\n")
@@ -113,7 +143,24 @@ RMT <- function(m,time_restriction,dist_state0,dist_state1,unique_event_times0,u
 
 
   # RESTRICT LIST TO SMALLER OF MAX FOLLOW-UPS FOR ARMS
-  nunique_event_times=length(unique_event_times[unique_event_times <= unique_event_times1[nunique_event_times1]])
+  # IF ONE ARM ENTERS 100% TERMINAL STATE, THEN CONTINUE TO LARGER FOLLOW-UP TIME
+  #nunique_event_times=length(unique_event_times[unique_event_times <= unique_event_times1[nunique_event_times1]])
+
+  if (max_follow0 <= max_follow1) {
+    max_time=max_follow0
+    #cat('max_time=',max_time,'\n')
+    j=length(unique_event_times[unique_event_times <= max_time])
+    #cat('j=',j,'\n')
+    #cat('dist_state0[m+1,j]=',dist_state0[m+1,j],'\n')
+    if (dist_state0[m+1,j]==1) {max_time=max_follow1}
+    #cat('max_time=',max_time,'\n')
+  } else {
+    max_time=max_follow1
+    j=length(unique_event_times[unique_event_times <= max_time])
+    if (new_dist_state1[m+1,j]==1) {max_time=max_follow0}
+  }
+  #max_time=min(max_follow0,max_follow1)
+  nunique_event_times=length(unique_event_times[unique_event_times <= max_time])
 
   #cat(" updated nunique_event_times=",nunique_event_times,"\n")
   #cat(" updated unique_event_times=",unique_event_times,"\n")
@@ -185,7 +232,9 @@ RMT <- function(m,time_restriction,dist_state0,dist_state1,unique_event_times0,u
     }
     j <- j + 1
   }
+
+  max_time=min(max_time,time_restriction)
 #  cat("final RMT=",rmst_time,"\n")
 #  cat("final components of RMT=",components,"\n")
-  return(list(rmst_time,components))
+  return(list(rmst_time,components,max_time))
 }

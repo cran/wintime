@@ -15,7 +15,7 @@ wintime(
   resample_num = 0,
   time_restriction = NA,
   seed = NA,
-  nimp = 0
+  nimp = 1
 )
 }
 \arguments{
@@ -48,7 +48,8 @@ Rows should represent participants and columns should represent covariate values
 A list containing: the observed treatment effect, a vector of length \code{resample_num} containing resampled treatment effects, a message
 indicating the method ran and the type of resampling done, the variance, the p-value (one-sided for treatment benefit), the total wins on treatment (pairwise methods only),
 the total losses on treatment (pairwise methods only), a vector of length 'm' with the components of the treatment effect,
-a vector of length 'm' with the variance of the components. A warning message will be printed for combinations of \code{type} and \code{model}/\code{resample}
+a vector of length 'm' with the variance of the components, the maximum time used in the comparisons (for EWT, RMT, EWTP, REWTP, EWTPR, REWTPR).
+A warning message will be printed for combinations of \code{type} and \code{model}/\code{resample}
 that are not recommended.
 }
 \description{
@@ -68,6 +69,51 @@ The type parameter specifies the procedure you would like to run.
 'rewtp' is Time Restricted Expected Win Time Against Trial Population.
 'rewtpr'is Time Restricted Expected Win Time Against Trial Population With Redistribution.
 'rpwt' is Time Restricted Pairwise Win Time.
+
+The maximum time used in comparisons for EWT, RMT, EWTP, REWTP, EWTPR, and REWTPR are defined below.
+
+First define separately for each arm the maximum valid time for estimating the multi-state distribution
+(max_valid_time0 and max_valid_time1) from either a Markov or KM model as follows.
+max_valid_time0 is the smallest time for the control arm when the estimated multi-state distribution has a
+positive probability of a state but there is nobody still at-risk in that state (If this never occurs
+then max_valid_time0 is defined to be the largest event time of the control arm (max_time0)).
+max_valid_time1 is the smallest time for the treatment arm when the estimated multi-state distribution has a
+positive probability of a state but there is nobody still at-risk in that state (If this never occurs
+then max_valid_time1 is defined to be the largest event time of the treatment arm(max_time1)).
+Also define the maximum valid time for the combined arms for estimating the multi-state distribution
+(max_valid_time2) from either a Markov or KM model as follows.
+max_valid_time2 is the smallest time for the combined arms when the estimated multi-state distribution has a
+positive probability of a state but there is nobody still at-risk in that state (If this never occurs
+then max_valid_time2 is defined to be the largest event time of the combined arms (max_time2)).
+
+EWT: There are two cases:
+(1) the arm with the smaller maximum valid time has an estimated multi-state distribution that is degenerate
+in the absorbing (highest) state at that time.
+(2) the arm with the smaller maximum valid time has an estimated multi-state distribution that is not degenerate
+in the absorbing (highest) state at that time.
+For case (1) the maximum time used in comparison is the max(max_valid_time0,max_valid_time1).
+For case (2) the maximum time used in comparison is the min(max_valid_time0,max_valid_time1).
+
+RMT: the maximum time used in comparison is min(the maximum time used in comparison for EWT, time_restriction).
+
+EWTP: There are two cases:
+(1) the combined arms have an estimated multi-state distribution that is degenerate in the absorbing (highest) state
+at max_valid_time2.
+(2) the combined arms have an estimated multi-state distribution that is not degenerate in the absorbing (highest) state
+at max_valid_time2.
+For case (1) the maximum time used in comparison is the max(max_valid_time2,max_time2).
+For case (2) the maximum time used in comparison is the min(max_valid_time2,max_time2).
+
+REWTP: the maximum time used in comparison is min(the maximum time used in comparison for EWTP, time_restriction).
+
+EWTPR: There are 8 cases based on which of the three (control arm, treatment arm, combined arms) estimated multi-state
+distributions are degenerate in the absorbing (highest) state at the maximum valid time.
+The maximum time used in comparison is the minimum of the max_valid_times over the arms (control, treatment, combined)
+that do not have degenerate estimated multi-state distibutions in the absorbing (highest) state at the maximum valid time
+(If all have a degenerate estimated multi-state distibutions in the absorbing (highest) state at the maximum valid time
+the maximum time used in comparison is defined as the maximum of the three max_valid_times).
+
+REWTPR: the maximum time used in comparison is min(the maximum time used in comparison for EWTPR, time_restriction).
 }
 \examples{
 # ------------------------------

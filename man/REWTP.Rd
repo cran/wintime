@@ -47,7 +47,8 @@ in increasing order of clinical severity.}
 \item{time_restriction}{The time restriction (days) for calculation.}
 }
 \value{
-A list containing: The estimated treatment effect from the linear regression model, the variance, the Z-statistic, the components of the treatment effect, and the variance of the components.
+A list containing: The estimated treatment effect from the linear regression model, the variance, the Z-statistic,
+the components of the treatment effect, the variance of the components, and the maximum time used in comparisons.
 }
 \description{
 Calculates the combined arm state space probabilities using a Markov model or a Kaplan-Meier model (recommended). This function uses these

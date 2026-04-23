@@ -44,7 +44,8 @@ in increasing order of clinical severity.}
 \item{trt}{A vector of length n containing treatment arm indicators (1 for treatment, 0 for control).}
 }
 \value{
-A list containing: The estimated treatment effect from the linear regression model, the variance, the Z-statistic, the components of the treatment effect, and the variance of the components.
+A list containing: The estimated treatment effect from the linear regression model, the variance, the Z-statistic,
+the components of the treatment effect, and the variance of the components.
 }
 \description{
 Calculates the control group state space probabilities using a Markov model (recommended) or a Kaplan-Meier model. This function uses these

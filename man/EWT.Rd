@@ -30,7 +30,7 @@ EWT(
 \item{nunique_event_times1}{The number of unique treatment arm event times (returned from wintime::km() or wintime::markov()).}
 }
 \value{
-A list of the expected win time of the treatment arm, the components of the treatment effect.
+A list of the expected win time of the treatment arm, the components of the treatment effect, and the maximum time used in comparisons.
 }
 \description{
 Calculates the state space probabilities using a Kaplan-Meier model (recommended) or a Markov model. This function uses these probabilities

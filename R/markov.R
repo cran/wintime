@@ -235,6 +235,10 @@ markov <- function(n0,n1,m,Time,Delta) {
     }
   }
 
+   # cat('----------------------------------------------','\n')
+   # cat('----------------------------------------------','\n')
+   # cat('Before loop3, max_follow0=',max_follow0,'\n')
+
 
   # Loop 3
   i <- 2
@@ -267,6 +271,20 @@ markov <- function(n0,n1,m,Time,Delta) {
     }
     i <- i + 1
   }
+  if (max_follow0==0) {max_follow0=unique_event_times0[nunique_event_times0]}
+
+  # cat('# of event times=',nunique_event_times0,'\n')
+  # cat('Control arm unique event times=','\n')
+  # print(unique_event_times0)
+  # cat('dist_state0[]=','\n')
+  # print(dist_state0)
+  # cat('num_state[]=','\n')
+  # print(num_state)
+  # cat('----------------------------------------------','\n')
+  # cat('----------------------------------------------','\n')
+  # cat('After loop3, max_follow0=',max_follow0,'\n')
+
+
 
 #---------------------------------------------------------
 #  Trt Arm
@@ -443,6 +461,7 @@ markov <- function(n0,n1,m,Time,Delta) {
     }
     i <- i + 1
   }
+  if (max_follow1==0) {max_follow1=unique_event_times1[nunique_event_times1]}
 
   #---------------------------------------------------------
   #  Combined Arms
@@ -500,7 +519,7 @@ markov <- function(n0,n1,m,Time,Delta) {
   unique_event_times2=ordered_event_times2
   num_state <- matrix(data=0,nrow=m+1,ncol=nevent_times2)
 
-  # Initialize all treatment patients into state 0
+  # Initialize all patients into state 0
   for (k in 1:nevent_times2) {
     num_state[1,k] <- n
   }
@@ -620,7 +639,14 @@ markov <- function(n0,n1,m,Time,Delta) {
     }
     i <- i + 1
   }
+  if (max_follow2==0) {max_follow2=unique_event_times2[nunique_event_times2]}
 
+  # cat('----------------------------------------------','\n')
+  # cat('----------------------------------------------','\n')
+  # cat('From markov:max_follow0=',max_follow0,'\n')
+  # cat('From markov:max_follow1=',max_follow1,'\n')
+  # cat('From markov:max_follow2=',max_follow2,'\n')
+  # cat('----------------------------------------------','\n')
 
   return(list(dist_state0 = dist_state0, dist_state1 = dist_state1, unique_event_times0 = unique_event_times0, unique_event_times1 = unique_event_times1,
               nunique_event_times0 = nunique_event_times0, nunique_event_times1 = nunique_event_times1, max_follow0 = max_follow0, max_follow1 = max_follow1,

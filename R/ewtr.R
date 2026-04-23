@@ -16,7 +16,8 @@
 #' @param markov_ind An indicator of the model type used (1 for Markov, 0 for Kaplan-Meier).
 #' @param cov A n x p matrix of covariate values, where p is the number of covariates.
 #' @param trt A vector of length n containing treatment arm indicators (1 for treatment, 0 for control).
-#' @return A list containing: The estimated treatment effect from the linear regression model, the variance, the Z-statistic, the components of the treatment effect, and the variance of the components.
+#' @return A list containing: The estimated treatment effect from the linear regression model, the variance, the Z-statistic,
+#' the components of the treatment effect, and the variance of the components.
 
 # ----------------------------------------
 # Expected win time against reference
@@ -27,16 +28,39 @@ EWTR <- function(n,m,nunique,maxfollow,untimes,Time,Delta,dist,markov_ind,cov,tr
   components <- rep(NA,m)
   components_var <- rep(NA,m)
 
+  # cat('From ewtr: # unique control event times=',nunique,'\n')
+  # cat('From ewtr: unique control times=',untimes,'\n')
+  # cat('From ewtr: maximum event time for control arm=',maxfollow,'\n')
+  # cat('From ewtr: control arm dist=','\n')
+  # print(dist)
+
+  # Check for extending comparisons when control arm is 100% in terminal state
+  extend=0
+  if (dist[m+1,nunique]==1) {extend=1}
+
+  # cat('-------------------------------------------','\n')
+  # cat('extend=',extend,'\n')
+  # cat('-------------------------------------------','\n')
+
+  # cat('Before addtime, control arm dist=','\n')
+  # print(tdist)
+  # cat('Before addtimes, # of tuntimes=',tnunique,'\n')
+  # cat('Before addtimes, tuntimes=','\n')
+  # print(tuntimes)
 
   # Initialize temporary variables
-  tuntimes <- numeric(nunique+3)
   tdist <- matrix(0,nrow=m+1,ncol=nunique+m)
-  ewtr <- numeric(n)
+  ewtr <- rep(0,times=n)
   ewtr_components <- matrix(0,nrow=m,ncol=n)
 
   # Start main loop
   for (i in 1:n) {
+     # cat('-------------------------------------------','\n')
+     # cat('-------------------------------------------','\n')
+     # cat('i=',i,'\n')
+
     # Create temp variables
+    tuntimes <- rep(0,times=nunique+m)
     tnunique <- nunique
     for (j in 1:nunique) {
       tuntimes[j] <- untimes[j]
@@ -49,21 +73,37 @@ EWTR <- function(n,m,nunique,maxfollow,untimes,Time,Delta,dist,markov_ind,cov,tr
       }
     }
 
+     # if (i==20) {
+     #   cat('Before addtime, control arm dist=','\n')
+     #   print(tdist)
+     #   cat('Before addtimes, # of tuntimes=',tnunique,'\n')
+     #   cat('Before addtimes, tuntimes=','\n')
+     #   print(tuntimes)
+     # }
+
     # Create addtime matrix
     addtime <- matrix(data=NA,nrow=m,ncol=n)
     # addtime1=(!(dataset1$time1 %in% unique_event_times0) & dataset1$time1 <= unique_event_times0[nunique_event_times0])
     # addtime2=(!(dataset1$time2 %in% unique_event_times0) & dataset1$delta2==1 & dataset1$time2 <= unique_event_times0[nunique_event_times0])
     # addtime3=(!(dataset1$time3 %in% unique_event_times0) & dataset1$delta3==1 & dataset1$time3 <= unique_event_times0[nunique_event_times0])
-    addtime[1, ] <- (!(time[1, ] %in% untimes) & time[1, ] <= untimes[nunique])
+
+    #addtime[1, ] <- (!(time[1, ] %in% untimes) & time[1, ] <= untimes[nunique])
+    addtime[1, ] <- (!(time[1, ] %in% tuntimes) & (time[1,] <= tuntimes[tnunique] | extend==1))
     for (k in 2:m) {
-      addtime[k, ] <- (!(time[k, ] %in% untimes) & delta[k, ] == 1 & time[k, ] <= untimes[nunique])
+      #addtime[k, ] <- (!(time[k, ] %in% untimes) & delta[k, ] == 1 & time[k, ] <= tuntimes[tnunique])
+      addtime[k, ] <- (!(time[k, ] %in% tuntimes) & delta[k, ] == 1 & (time[k,] <= tuntimes[tnunique] | extend==1))
     }
     # cat("-----------------------------------------------", "\n")
     # cat("dim addtime =", dim(addtime), "\n")
     # cat("addtime =","\n")
     # print(addtime)
     # Add events
+
+    # cat('addtime (rows in reverse order of event types, columns are subjects)=','\n')
+    # print(addtime)
+
     for (event in 1:m) {
+#      if (i==20) {cat('event=',event,'\n')}
       if (addtime[event,i] == TRUE) {
         jstop <- 0
         for (j in 1:tnunique) {
@@ -77,23 +117,64 @@ EWTR <- function(n,m,nunique,maxfollow,untimes,Time,Delta,dist,markov_ind,cov,tr
         if(jstop == 0) {
           jstop <- 1
         }
-        tdist[,tnunique] <- 0
+ #       if (i==20) {cat('Addtime==TRUE, jstop=',jstop,'\n')}
+        #tdist[,tnunique] <- 0
         tnunique <- tnunique + 1
+        # if (i==18) {cat('tnunique=',tnunique,'\n')}
+        if (jstop==1) {
+          tdist[,tnunique] <- c(1,rep(0,times=m))
+        } else {
+          tdist[,tnunique] <- tdist[,jstop]
+        }
         tuntimes[tnunique] <- time[event,i]
         j <- tnunique
 
-        while(j > jstop) {
-          tdist[,j] <- tdist[,(j-1)]
-          if (j > jstop + 1) {
+#        if (i==20) {cat('tuntimes[tnunique]=',tuntimes[tnunique],'\n')}
+#        if (i==20) {cat('j=',j,'\n')}
+        #while(j > jstop) {
+        #  tdist[,j] <- tdist[,(j-1)]
+        #  if (j > jstop + 1) {
             # swap indices j and (j-1)
-            temp <- tuntimes[j]
-            tuntimes[j] <- tuntimes[j-1]
-            tuntimes[j-1] <- temp
-          }
+        #    temp <- tuntimes[j]
+        #    tuntimes[j] <- tuntimes[j-1]
+        #    tuntimes[j-1] <- temp
+        #  }
+        #  j <- j - 1
+        #}
+ #        if (i==20) {cat('tuntimes[j-1]=',tuntimes[j-1],'\n')}
+        while(tuntimes[j] < tuntimes[j-1]) {
+ #--------------------------------------------------
+ # swap indices j and (j-1)
+ #--------------------------------------------------
+ #         if (i==20) {cat('swap indicies j & j-1=',j,j-1,'\n')}
+          temp <- tuntimes[j]
+          tuntimes[j] <- tuntimes[j-1]
+          tuntimes[j-1] <- temp
+          vtemp <- tdist[,j]
+          tdist[,j] <- tdist[,j-1]
+          tdist[,j-1] <- vtemp
           j <- j - 1
+          if (j==jstop) {break}
+#          if (i==20) {cat('new index j=',j,'\n')}
         }
+
       }
     }
+    tuntimes=tuntimes[1:tnunique]
+
+    # if (i==20) {
+    #   cat('After addtime, control arm dist=','\n')
+    #   print(tdist)
+    #   cat('After addtimes, # of tuntimes=',tnunique,'\n')
+    #   cat('After addtimes, tuntimes=','\n')
+    #   print(tuntimes)
+    # }
+
+    # cat(' # nunique event times after addition of current subject=',tnunique,'\n')
+    # cat('unique event times after addition of current subject=',tuntimes,'\n')
+    # cat('control arm dist=','\n')
+    # print(tdist)
+
 
     # Set jmax
     jmax <- 0
@@ -102,16 +183,23 @@ EWTR <- function(n,m,nunique,maxfollow,untimes,Time,Delta,dist,markov_ind,cov,tr
         jmax <- jmax + 1
       }
     }
-    if (markov_ind == FALSE) {
-      jmax <- min(maxfollow,jmax)
-    }
+    #if (markov_ind == FALSE) {
+    #  jmax <- min(maxfollow,jmax)
+    #}
+
     if (delta[1,i] == 1) {
       jmax <- tnunique - 1
     }
 
+    # cat('jmax=',jmax,'\n')
+    # cat('---------------------------------------','\n')
+
     # Set state
     if (jmax != 0) {
       for (j in 1:jmax) {
+
+        #cat('j=',j,'\n')
+
         state <- 0
         for (current_state in m:1) {
           temp_time_index <- m - current_state + 1
@@ -120,6 +208,8 @@ EWTR <- function(n,m,nunique,maxfollow,untimes,Time,Delta,dist,markov_ind,cov,tr
             break
           }
         }
+
+        #cat('state=',state,'\n')
 
         # Calculate ewtr
 
@@ -146,6 +236,7 @@ EWTR <- function(n,m,nunique,maxfollow,untimes,Time,Delta,dist,markov_ind,cov,tr
             break
           }
         }
+        #cat('ewtr[',i,']=',ewtr[i],'\n')
       }
     }
   }

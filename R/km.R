@@ -103,6 +103,7 @@ km <- function(n0,n1,m,Time,Delta) {
   # Create KM survival curve matrices
   Time0 <- matrix(0,nrow=m,ncol=n)
   Surv0 <- matrix(0,nrow=m,ncol=n)
+  NRisk0 <- matrix(0,nrow=m,ncol=n)
   conkm <- matrix(0,nrow=m,ncol=m*n)
 
   for (k in 1:m) {
@@ -110,14 +111,35 @@ km <- function(n0,n1,m,Time,Delta) {
     # temp2 <- survfit(Surv(time_km[k,dataset1$trt==0],delta_km[k,dataset1$trt==0])~1)$surv
     temp <- survival::survfit(survival::Surv(time_km[k,1:n0],delta_km[k,1:n0])~1)$time
     temp2 <- survival::survfit(survival::Surv(time_km[k,1:n0],delta_km[k,1:n0])~1)$surv
+    temp3 <- survival::survfit(survival::Surv(time_km[k,1:n0],delta_km[k,1:n0])~1)$n.risk
     Time0[k,1:length(temp)] <- temp
     Surv0[k,1:length(temp2)] <- temp2
+    NRisk0[k,1:length(temp3)] <- temp3
   }
+
+  # cat('','\n')
+  # cat('-------------------------------------------','\n')
+  # cat('-------------------------------------------','\n')
+  # cat('START KM Control group','\n')
+  # cat('-------------------------------------------','\n')
+  # cat('n=',n,'\n')
+  # cat('-------------------------------------------','\n')
+  # cat('Control group times for m-k+1+ events (reverse order), Time0[k,]=','\n')
+  # print(Time0)
+
+  # cat('Control group survival estimates for m-k+1+ events (reverse order), Surv0[k,]=','\n')
+  # print(Surv0)
+
+  # cat('Control group # at risk for m-k+1+ events (reverse order), NRisk0[k,]=','\n')
+  # print(NRisk0)
 
   nkm <- numeric(m)
   for (k in 1:m) {
     nkm[k] <- sum(Time0[k,] != 0)
   }
+
+  # cat('Control group # of times, nkm[k]=','\n')
+  # print(nkm)
 
   dist_state0 <- matrix(0,nrow=(m+1),ncol=sum(nkm))
   unique_event_times0 <- rep(0,times=sum(nkm))
@@ -129,14 +151,18 @@ km <- function(n0,n1,m,Time,Delta) {
   }
   max_follow0 <- min(control_follow_times)
 
+  #cat('Control group max_follow0=',max_follow0,'\n')
+
   time <- 0
   count <- rep(0,m)
   max_times <- rep(0,m)
   nunique_event_times0 <- 0
 
   next_count <- rep(0,m)
+  KM_end=0
 
-  while (time < max_follow0) {
+   while (KM_end==0 & time < max(Time0)) {
+  #while (time < max_follow0) {
     for (i in 1:m) {
       next_count[i] <- count[i] + 1
     }
@@ -159,6 +185,24 @@ km <- function(n0,n1,m,Time,Delta) {
     nunique_event_times0=nunique_event_times0+1
     unique_event_times0[nunique_event_times0]=time
 
+    # cat('-------------------------','\n')
+    # cat('Add unique event time=',unique_event_times0[nunique_event_times0],'\n')
+    # cat('nunique_event_times0=',nunique_event_times0,'\n')
+    # cat('unique_event_times0=','\n')
+    # print(unique_event_times0)
+    # cat('-------------------------','\n')
+
+    # cat('-------------------------','\n')
+    # cat('Before Updating  conkm[k,]','\n')
+    # cat('Control group # at risk for m-k+1+ events (reverse order), NRisk0[k,]=','\n')
+    # print(NRisk0)
+    # cat('next_count[k]=','\n')
+    # print(next_count[])
+    # cat('dist_state0[k,] for being in state k-1=','\n')
+    # print(dist_state0)
+    # cat('-------------------------','\n')
+
+
     #  Update conkm[]
     #
     for (k in 1:m) {
@@ -175,11 +219,52 @@ km <- function(n0,n1,m,Time,Delta) {
       }
     }
 
+    # cat('-------------------------','\n')
+    # cat('Updated conkm[k,] for m-k+1+ events(reverse order)=','\n')
+    # print(conkm)
+    # cat('-------------------------','\n')
+
     for (k in 1:m) {
       if (Time0[k,next_count[k]] <= time) {
         count[k] <- next_count[k]
       }
     }
+
+    # cat('Updated count[k] (reverse order)=','\n')
+    # print(count[])
+
+  #---------------------------------------------------------
+  # Calculate # at risk after current time in each state
+  #---------------------------------------------------------
+    NRisk_state0=rep(0,times=m+1)
+    sum=0
+    if (count[m]==n0) {
+      NRisk_state0[1]=0
+    } else {
+      NRisk_state0[1]=NRisk0[m,count[m]+1]
+      sum=NRisk0[m,count[m]+1]
+    }
+  #  cat('# at risk in state k-1 NRisk_state0[1]=','\n')
+  #  print(NRisk_state0[1])
+    for (k in 2:m) {
+  #      cat('k=',k,'\n')
+  #      cat('# at risk in state k-2 NRisk_state0[k-1]=','\n')
+  #      print(NRisk_state0[k-1])
+  #      cat('count[m-k+1]=',count[m-k+1],'\n')
+  #      cat('NRisk0[(m-k+1),count[m-k+1]]=','\n')
+  #      print(NRisk0[(m-k+1),count[m-k+1]])
+      if (count[m-k+1]==n0) {
+        NRisk_state0[k]=0
+      } else {
+        NRisk_state0[k]=NRisk0[(m-k+1),count[m-k+1]+1]-sum
+        sum=sum+NRisk_state0[k]
+      }
+    }
+    NRisk_state0[m+1]=n0-sum
+
+    # cat('# at risk after current time in state k-1 NRisk_state0[k]=','\n')
+    # print(NRisk_state0)
+
 
     # Set probability of being in state 0
     if (count[m] > 0) {
@@ -202,6 +287,32 @@ km <- function(n0,n1,m,Time,Delta) {
         }
       }
     }
+    # cat('-------------------------','\n')
+    # cat('conkm[k,] for m-k+1+ events(reverse order)=','\n')
+    # print(conkm)
+    # cat('dist_state0[k,] for being in state k-1=','\n')
+    # print(dist_state0)
+    # cat('-------------------------','\n')
+
+    #------------------------------------------------------------------
+    # Check if a state without anyone at risk has positive probability
+    #------------------------------------------------------------------
+
+    for (k in 1:(m-1)) {
+        #      cat('k=',k,'\n')
+        #      cat('nunique_event_times0=',nunique_event_times0,'\n')
+        #      cat('NRisk_state0[k]=','\n')
+        #      print(NRisk_state0[k])
+        #      cat('dist_state0[k,nunique_event_times0]=','\n')
+        #      print(dist_state0[k,nunique_event_times0])
+      if (NRisk_state0[k]==0 & dist_state0[k,nunique_event_times0]>0) {KM_end=1}
+    }
+    max_follow0=time
+
+    # cat('KM_end=',KM_end,'\n')
+    # cat('time=',time,'\n')
+    # cat('Control arm max_follow0=',max_follow0,'\n')
+
   }
   unique_event_times0=unique_event_times0[1:nunique_event_times0]
   conkm=conkm[1:m,1:nunique_event_times0]
@@ -214,6 +325,7 @@ km <- function(n0,n1,m,Time,Delta) {
   # Create KM survival curve matrices
   Time1 <- matrix(0,nrow=m,ncol=n)
   Surv1 <- matrix(0,nrow=m,ncol=n)
+  NRisk1 <- matrix(0,nrow=m,ncol=n)
   trtkm <- matrix(0,nrow=m,ncol=m*n)
 
   for (k in 1:m) {
@@ -221,14 +333,33 @@ km <- function(n0,n1,m,Time,Delta) {
     # temp2 <- survfit(Surv(time_km[k,dataset1$trt==1],delta_km[k,dataset1$trt==1])~1)$surv
     temp <- survival::survfit(survival::Surv(time_km[k,(n0+1):n],delta_km[k,(n0+1):n])~1)$time
     temp2 <- survival::survfit(survival::Surv(time_km[k,(n0+1):n],delta_km[k,(n0+1):n])~1)$surv
+    temp3 <- survival::survfit(survival::Surv(time_km[k,(n0+1):n],delta_km[k,(n0+1):n])~1)$n.risk
+    NRisk1[k,1:length(temp3)] <- temp3
     Time1[k,1:length(temp)] <- temp
     Surv1[k,1:length(temp2)] <- temp2
   }
+
+  # cat('                  ','\n')
+  # cat('                  ','\n')
+  # cat('START KM Trt group','\n')
+  # cat('-------------------------------------------','\n')
+  # cat('-------------------------------------------','\n')
+  # cat('Trt group times for m-k+1+ events (reverse order), Time1[k,]=','\n')
+  # print(Time1)
+
+  # cat('Trt group survival estimates for m-k+1+ events (reverse order), Surv1[k,]=','\n')
+  # print(Surv1)
+
+  # cat('Trt group # at risk for m-k+1+ events (reverse order), NRisk1[k,]=','\n')
+  # print(NRisk1)
 
   nkm <- numeric(m)
   for (k in 1:m) {
     nkm[k] <- sum(Time1[k,] != 0)
   }
+
+  # cat('Trt group # of times, nkm[k]=','\n')
+  # print(nkm)
 
   dist_state1 <- matrix(0,nrow=(m+1),ncol=sum(nkm))
   unique_event_times1 <- rep(0,times=sum(nkm))
@@ -241,14 +372,18 @@ km <- function(n0,n1,m,Time,Delta) {
 
   max_follow1 <- min(trt_follow_times)
 
+  #cat('Trt group max_follow1=',max_follow1,'\n')
+
   time <- 0
   count <- rep(0,m)
   max_times <- rep(0,m)
   nunique_event_times1 <- 0
 
   next_count <- rep(0,m)
+  KM_end=0
 
-  while (time < max_follow1) {
+  while (KM_end==0 & time < max(Time1)) {
+  #while (time < max_follow1) {
     for (i in 1:m) {
       next_count[i] <- count[i] + 1
     }
@@ -271,6 +406,23 @@ km <- function(n0,n1,m,Time,Delta) {
     nunique_event_times1=nunique_event_times1+1
     unique_event_times1[nunique_event_times1]=time
 
+    # cat('-------------------------','\n')
+    # cat('Add unique event time=',unique_event_times1[nunique_event_times1],'\n')
+    # cat('nunique_event_times1=',nunique_event_times1,'\n')
+    # cat('unique_event_times1=','\n')
+    # print(unique_event_times1)
+    # cat('-------------------------','\n')
+
+    # cat('-------------------------','\n')
+    # cat('Before Updating  trtkm[k,]','\n')
+    # cat('Trt group # at risk for m-k+1+ events (reverse order), NRisk1[k,]=','\n')
+    # print(NRisk1)
+    # cat('next_count[k]=','\n')
+    # print(next_count[])
+    # cat('dist_state1[k,] for being in state k-1=','\n')
+    # print(dist_state1)
+    # cat('-------------------------','\n')
+
     #  Update trtkm[]
     #
     for (k in 1:m) {
@@ -287,11 +439,51 @@ km <- function(n0,n1,m,Time,Delta) {
       }
     }
 
+    # cat('-------------------------','\n')
+    # cat('Updated trtkm[k,] for m-k+1+ events(reverse order)=','\n')
+    # print(trtkm)
+    # cat('-------------------------','\n')
+
     for (k in 1:m) {
       if (Time1[k,next_count[k]] <= time) {
         count[k] <- next_count[k]
       }
     }
+
+    # cat('Updated count[k]=','\n')
+    # print(count[])
+
+    #---------------------------------------------------------
+    # Calculate # at risk after current time in each state
+    #---------------------------------------------------------
+    NRisk_state1=rep(0,times=m)
+    sum=0
+    if (count[m]==n1) {
+      NRisk_state1[1]=0
+    } else {
+      NRisk_state1[1]=NRisk1[m,count[m]+1]
+      sum=NRisk1[m,count[m]+1]
+    }
+    #  cat('# at risk in state k-1 NRisk_state1[1]=','\n')
+    #  print(NRisk_state1[1])
+    for (k in 2:m) {
+      #      cat('k=',k,'\n')
+      #      cat('# at risk in state k-2 NRisk_state1[k-1]=','\n')
+      #      print(NRisk_state1[k-1])
+      #      cat('count[m-k+1]=',count[m-k+1],'\n')
+      #      cat('NRisk1[(m-k+1),count[m-k+1]]=','\n')
+      #      print(NRisk1[(m-k+1),count[m-k+1]])
+      if (count[m-k+1]==n1) {
+        NRisk_state1[k]=0
+      } else {
+        NRisk_state1[k]=NRisk1[(m-k+1),count[m-k+1]+1]-sum
+        sum=sum+NRisk_state1[k]
+      }
+    }
+
+    # cat('# at risk after current time in state k-1 NRisk_state1[k]=','\n')
+    # print(NRisk_state1)
+
 
     # Set probability of being in state 0
     if (count[m] > 0) {
@@ -314,6 +506,34 @@ km <- function(n0,n1,m,Time,Delta) {
         }
       }
     }
+
+    # cat('-------------------------','\n')
+    # cat('trtkm[k,] for m-k+1+ events(reverse order)=','\n')
+    # print(trtkm)
+    # cat('dist_state1[k,] for being in state k-1=','\n')
+    # print(dist_state1)
+    # cat('-------------------------','\n')
+
+    #------------------------------------------------------------------
+    # Check if a state without anyone at risk has positive probability
+    #------------------------------------------------------------------
+
+    for (k in 1:(m-1)) {
+      #      cat('k=',k,'\n')
+      #      cat('nunique_event_times1=',nunique_event_times1,'\n')
+      #      cat('NRisk_state1[k]=','\n')
+      #      print(NRisk_state1[k])
+      #      cat('dist_state1[k,nunique_event_times1]=','\n')
+      #      print(dist_state1[k,nunique_event_times1])
+      if (NRisk_state1[k]==0 & dist_state1[k,nunique_event_times1]>0) {KM_end=1}
+    }
+    max_follow1=time
+
+    # cat('KM_end=',KM_end,'\n')
+    # cat('time=',time,'\n')
+    # cat('Trt group max_follow1=',max_follow1,'\n')
+
+
   }
   unique_event_times1=unique_event_times1[1:nunique_event_times1]
   trtkm=trtkm[1:m,1:nunique_event_times1]
@@ -326,6 +546,8 @@ km <- function(n0,n1,m,Time,Delta) {
   # Create KM survival curve matrices
   Time2 <- matrix(0,nrow=m,ncol=n)
   Surv2 <- matrix(0,nrow=m,ncol=n)
+  NRisk2 <- matrix(0,nrow=m,ncol=n)
+
   comkm <- matrix(0,nrow=m,ncol=m*n)
 
   for (k in 1:m) {
@@ -333,6 +555,8 @@ km <- function(n0,n1,m,Time,Delta) {
     # temp2 <- survfit(Surv(time_km[k,dataset1$trt==0],delta_km[k,dataset1$trt==0])~1)$surv
     temp <- survival::survfit(survival::Surv(time_km[k,1:n],delta_km[k,1:n])~1)$time
     temp2 <- survival::survfit(survival::Surv(time_km[k,1:n],delta_km[k,1:n])~1)$surv
+    temp3 <- survival::survfit(survival::Surv(time_km[k,1:n],delta_km[k,1:n])~1)$n.risk
+    NRisk2[k,1:length(temp3)] <- temp3
     Time2[k,1:length(temp)] <- temp
     Surv2[k,1:length(temp2)] <- temp2
   }
@@ -347,10 +571,27 @@ km <- function(n0,n1,m,Time,Delta) {
 #  cat('Surv2[3,1:15]=',Surv2[3,1:15],'\n')
 #  cat('------------------------------------------','\n')
 
+  # cat('                  ','\n')
+  # cat('                  ','\n')
+  # cat('START KM Combined group','\n')
+  # cat('-------------------------------------------','\n')
+  # cat('-------------------------------------------','\n')
+  # cat('Combined group times for m-k+1+ events (reverse order), Time2[k,]=','\n')
+  # print(Time2)
+
+  # cat('Combined group survival estimates for m-k+1+ events (reverse order), Surv2[k,]=','\n')
+  # print(Surv2)
+
+  # cat('Combined group # at risk for m-k+1+ events (reverse order), NRisk2[k,]=','\n')
+  # print(NRisk2)
+
   nkm <- numeric(m)
   for (k in 1:m) {
     nkm[k] <- sum(Time2[k,] != 0)
   }
+
+  # cat('Combined group # of times, nkm[k]=','\n')
+  # print(nkm)
 
 #  cat('nkm[1]=',nkm[1],'\n')
 #  cat('nkm[2]=',nkm[2],'\n')
@@ -368,8 +609,8 @@ km <- function(n0,n1,m,Time,Delta) {
   }
   max_follow2 <- min(com_follow_times)
 
-#   cat('max_follow2=',max_follow2,'\n')
-#   cat('------------------------------------------','\n')
+  # cat('Combined group max_follow2=',max_follow2,'\n')
+  # cat('------------------------------------------','\n')
 
 
   time <- 0
@@ -378,8 +619,10 @@ km <- function(n0,n1,m,Time,Delta) {
   nunique_event_times2 <- 0
 
   next_count <- rep(0,m)
+  KM_end=0
 
-  while (time < max_follow2) {
+  while (KM_end==0 & time < max(Time2)) {
+  #while (time < max_follow2) {
     for (i in 1:m) {
       next_count[i] <- count[i] + 1
     }
@@ -402,6 +645,23 @@ km <- function(n0,n1,m,Time,Delta) {
     nunique_event_times2=nunique_event_times2+1
     unique_event_times2[nunique_event_times2]=time
 
+    # cat('-------------------------','\n')
+    # cat('Add unique event time=',unique_event_times2[nunique_event_times2],'\n')
+    # cat('nunique_event_times2=',nunique_event_times2,'\n')
+    # cat('unique_event_times2=','\n')
+    # print(unique_event_times2)
+    # cat('-------------------------','\n')
+
+    # cat('-------------------------','\n')
+    # cat('Before Updating  comkm[k,]','\n')
+    # cat('Combined group # at risk for m-k+1+ events (reverse order), NRisk2[k,]=','\n')
+    # print(NRisk2)
+    # cat('next_count[k]=','\n')
+    # print(next_count[])
+    # cat('dist_state2[k,] for being in state k-1=','\n')
+    # print(dist_state2)
+    # cat('-------------------------','\n')
+
     #  Update comkm[]
     #
     for (k in 1:m) {
@@ -417,6 +677,11 @@ km <- function(n0,n1,m,Time,Delta) {
         }
       }
     }
+
+    # cat('-------------------------','\n')
+    # cat('Updated comkm[k,] for m-k+1+ events(reverse order)=','\n')
+    # print(comkm)
+    # cat('-------------------------','\n')
 
     # if (time < Time2[3,15]) {
     # cat('time=',time,'\n')
@@ -435,6 +700,40 @@ km <- function(n0,n1,m,Time,Delta) {
         count[k] <- next_count[k]
       }
     }
+
+    # cat('Updated count[k]=','\n')
+    # print(count[])
+
+    #---------------------------------------------------------
+    # Calculate # at risk after current time in each state
+    #---------------------------------------------------------
+    NRisk_state2=rep(0,times=m)
+    sum=0
+    if (count[m]==n) {
+      NRisk_state2[1]=0
+    } else {
+       NRisk_state2[1]=NRisk2[m,count[m]+1]
+       sum=NRisk2[m,count[m]+1]
+    }
+    #  cat('# at risk in state k-1 NRisk_state2[1]=','\n')
+    #  print(NRisk_state2[1])
+    for (k in 2:m) {
+      #      cat('k=',k,'\n')
+      #      cat('# at risk in state k-2 NRisk_state2[k-1]=','\n')
+      #      print(NRisk_state2[k-1])
+      #      cat('count[m-k+1]=',count[m-k+1],'\n')
+      #      cat('NRisk2[(m-k+1),count[m-k+1]]=','\n')
+      #      print(NRisk2[(m-k+1),count[m-k+1]])
+      if (count[m-k+1]==n) {
+        NRisk_state2[k]=0
+      } else {
+        NRisk_state2[k]=NRisk2[(m-k+1),count[m-k+1]+1]-sum
+        sum=sum+NRisk_state2[k]
+      }
+    }
+
+    # cat('# at risk after current time in state k-1 NRisk_state2[k]=','\n')
+    # print(NRisk_state2)
 
     # Set probability of being in state 0
     if (count[m] > 0) {
@@ -457,17 +756,45 @@ km <- function(n0,n1,m,Time,Delta) {
         }
       }
     }
+
+    # cat('-------------------------','\n')
+    # cat('comkm[k,] for m-k+1+ events(reverse order)=','\n')
+    # print(comkm)
+    # cat('dist_state2[k,] for being in state k-1=','\n')
+    # print(dist_state2)
+    # cat('-------------------------','\n')
+
+    #------------------------------------------------------------------
+    # Check if a state without anyone at risk has positive probability
+    #------------------------------------------------------------------
+
+    for (k in 1:(m-1)) {
+      #      cat('k=',k,'\n')
+      #      cat('nunique_event_times2=',nunique_event_times2,'\n')
+      #      cat('NRisk_state2[k]=','\n')
+      #      print(NRisk_state2[k])
+      #      cat('dist_state2[k,nunique_event_times2]=','\n')
+      #      print(dist_state2[k,nunique_event_times2])
+      if (NRisk_state2[k]==0 & dist_state2[k,nunique_event_times2]>0) {KM_end=1}
+    }
+    max_follow2=time
+
+    # cat('KM_end=',KM_end,'\n')
+    # cat('time=',time,'\n')
+    # cat('Combined group max_follow2=',max_follow2,'\n')
+
+
   }
   unique_event_times2=unique_event_times2[1:nunique_event_times2]
   dist_state2=dist_state2[1:(m+1),1:nunique_event_times2]
   comkm=comkm[1:m,1:nunique_event_times2]
 
-  # cat('----------------------------------------------------','\n')
-  # cat('From km: nunique_event_times2=',nunique_event_times2,'\n')
-  # cat('From km: unique_event_times2=',unique_event_times2,'\n')
-  # cat('From km: dist_state2=','\n')
-  # print(dist_state2)
-  # cat('----------------------------------------------------','\n')
+   # cat('----------------------------------------------------','\n')
+   # cat('From km: nunique_event_times2=',nunique_event_times2,'\n')
+   # cat('From km: unique_event_times2=',unique_event_times2,'\n')
+   # cat('From km: dist_state2=','\n')
+   # print(dist_state2)
+   # cat('----------------------------------------------------','\n')
 
   return(list(dist_state0 = dist_state0,dist_state1 = dist_state1,unique_event_times0 = unique_event_times0,unique_event_times1 = unique_event_times1,
               nunique_event_times0 = nunique_event_times0,nunique_event_times1 = nunique_event_times1,max_follow0 = max_follow0,max_follow1 = max_follow1,
