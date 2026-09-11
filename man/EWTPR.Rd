@@ -16,21 +16,18 @@ EWTPR(
   markov_ind,
   cov,
   trt,
-  comkm,
   trans_prob2,
   nunique1,
   maxfollow1,
   untimes1,
   dist1,
-  trtkm,
   trans_prob1,
   nunique0,
   maxfollow0,
   untimes0,
   dist0,
-  conkm,
   trans_prob0,
-  nimp
+  max_time_inc
 )
 }
 \arguments{
@@ -40,7 +37,7 @@ EWTPR(
 
 \item{nunique2}{The number of unique combined arm event times (returned from wintime::markov() or wintime::km()).}
 
-\item{maxfollow2}{The max combined arm follow up time (days) (returned from wintime::markov() or wintime::km()).}
+\item{maxfollow2}{The max combined arm time (days) for valid nonparametric state space estimation (returned from wintime::markov() or wintime::km()).}
 
 \item{untimes2}{A vector containing unique combined arm event times (days) (returned from wintime::markov() or wintime::km()).}
 
@@ -58,41 +55,36 @@ in increasing order of clinical severity.}
 
 \item{trt}{A vector of length n containing treatment arm indicators (1 for treatment, 0 for control).}
 
-\item{comkm}{A m x nunique2 matrix of combined arm survival probabilities (returned from wintime::markov() or wintime::km()).}
-
 \item{trans_prob2}{A (m x m x number of combined arm event times)
-matrix where (i,j,k)'th value is transition probability from state i to state j at k'th combined arm event time. (returned from wintime::markov() or wintime::km()).}
+matrix where (i,j,k)'th value is transition probability from state i-1 to state j at k'th combined arm event time. (returned from wintime::markov() or wintime::km()).}
 
 \item{nunique1}{The number of unique trt arm event times (returned from wintime::markov() or wintime::km()).}
 
-\item{maxfollow1}{The max trt arm follow up time (days) (returned from wintime::markov() or wintime::km()).}
+\item{maxfollow1}{The max trt arm time (days) for valid nonparametric state space estimation (returned from wintime::markov() or wintime::km()).}
 
 \item{untimes1}{A vector containing unique trt arm event times (days) (returned from wintime::markov() or wintime::km()).}
 
 \item{dist1}{A matrix of trt arm state probabilities (returned from wintime::markov() or wintime::km()).}
 
-\item{trtkm}{A m x nunique1 matrix of trt arm survival probabilities (returned from wintime::markov() or wintime::km()).}
-
 \item{trans_prob1}{A (m x m x number of trt arm event times)
-matrix where (i,j,k)'th value is transition probability from state i to state j at k'th trt arm event time. (returned from wintime::markov() or wintime::km()).}
+matrix where (i,j,k)'th value is transition probability from state i-1 to state j at k'th trt arm event time. (returned from wintime::markov() or wintime::km()).}
 
 \item{nunique0}{The number of unique control arm event times (returned from wintime::markov() or wintime::km()).}
 
-\item{maxfollow0}{The max control arm follow up time (days) (returned from wintime::markov() or wintime::km()).}
+\item{maxfollow0}{The max control arm time (days) for valid nonparametric state space estimation (returned from wintime::markov() or wintime::km()).}
 
 \item{untimes0}{A vector containing unique control arm event times (days) (returned from wintime::markov() or wintime::km()).}
 
 \item{dist0}{A matrix of control arm state probabilities (returned from wintime::markov() or wintime::km()).}
 
-\item{conkm}{A m x nunique0 matrix of control arm survival probabilities (returned from wintime::markov() or wintime::km()).}
-
 \item{trans_prob0}{A (m x m x number of control arm event times)
-matrix where (i,j,k)'th value is transition probability from state i to state j at k'th control arm event time. (returned from wintime::markov() or wintime::km()).}
+matrix where (i,j,k)'th value is transition probability from state i-1 to state j at k'th control arm event time. (returned from wintime::markov() or wintime::km()).}
 
-\item{nimp}{The number of random imputations.}
+\item{max_time_inc}{Optional. Maximal time increment for updating multi-state distribution when parametric exponential extension models are used.
+If unspecified, updates done at each event time in combined trial.}
 }
 \value{
-A list containing: The estimated treatment effect from the linear regression model, the variance, the Z-statistic, the components of the treatment effect, the variance of the components, and the maximum time used in comparisons.
+A list containing: The estimated treatment effect from the linear regression model, the variance, the Z-statistic, the components of the treatment effect, the variance of the components.
 }
 \description{
 Calculates the combined arm state space probabilities using a Markov model or a Kaplan-Meier model (recommended).

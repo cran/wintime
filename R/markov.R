@@ -16,9 +16,9 @@
 #' arm event times, the number of unique treatment arm event times, the control arm max follow time (days), the treatment arm
 #' max follow time (days), a matrix of combined arm state probabilities, a vector of unique combined arm event times (days),
 #' the number of unique combined arm event times, the combined arm max follow time (days), a (m x m x number of combined arm event times)
-#' matrix where (i,j,k)'th value is transition probability from state i to state j at k'th combined arm event time,
-#' matrix where (i,j,k)'th value is transition probability from state i to state j at k'th trt arm event time,
-#' matrix where (i,j,k)'th value is transition probability from state i to state j at k'th control arm event time.
+#' matrix where (i,j,k)'th value is transition probability from state i-1 to state j at k'th combined arm event time,
+#' matrix where (i,j,k)'th value is transition probability from state i-1 to state j at k'th trt arm event time,
+#' matrix where (i,j,k)'th value is transition probability from state i-1 to state j at k'th control arm event time.
 #' @examples
 #' # -----------------------------
 #' # Example inputs
@@ -135,14 +135,14 @@ markov <- function(n0,n1,m,Time,Delta) {
 
 #cat('nevent_times0=',nevent_times0,'\n')
   event_times0=event_times0[1:nevent_times0]
-#cat('event_times0=',event_times0,'\n')
+#cat('event_times0=',sort(event_times0),'\n')
 #cat('dim(trans)=',dim(trans),'\n')
   trans <- trans[ , ,1:nevent_times0,drop=FALSE]
 #cat('dim(trans)=',dim(trans),'\n')
   perm_event_times0=order(event_times0)
 #cat('perm_event_times0=',perm_event_times0,'\n')
   ordered_event_times0=event_times0[perm_event_times0]
-  trans <- trans[ , ,perm_event_times0]
+  trans <- trans[ , ,perm_event_times0,drop=FALSE]
 #cat('dim(trans)=',dim(trans),'\n')
   unique_event_times0=ordered_event_times0
   num_state <- matrix(data=0,nrow=m+1,ncol=nevent_times0)
@@ -158,6 +158,7 @@ markov <- function(n0,n1,m,Time,Delta) {
   i = 1
   nunique_event_times0 = 0
 
+  #cat('Control:dim(trans)=',dim(trans),'\n')
   # Loop 2
   while (i <= nevent_times0) {
     nunique_event_times0 = nunique_event_times0 + 1
@@ -177,6 +178,7 @@ markov <- function(n0,n1,m,Time,Delta) {
         end = 1
       }
     }
+
     while (i <= j) {
       # Subtract transitions out of state 0
       num_state[1, nunique_event_times0] <- num_state[1, nunique_event_times0] - sum(trans[1, , i])
@@ -194,6 +196,9 @@ markov <- function(n0,n1,m,Time,Delta) {
   }
 
   unique_event_times0=unique_event_times0[1:nunique_event_times0]
+  #cat('nunique_event_times0=',nunique_event_times0,'\n')
+  #cat('unique_event_times0=',unique_event_times0,'\n')
+
   tnum_state <- matrix(data=0,nrow=(m+1),ncol=nunique_event_times0)
   for (k in 1:(m+1)) {
     tnum_state[k,] <- num_state[k,1:nunique_event_times0]
@@ -251,6 +256,9 @@ markov <- function(n0,n1,m,Time,Delta) {
         }
       }
       else {
+        for (j in event_num:m) {
+          trans_prob0[event_num,j,i]=0
+        }
         dist_state0[event_num,i] <- dist_state0[event_num,i-1]
       }
     }
@@ -336,9 +344,12 @@ markov <- function(n0,n1,m,Time,Delta) {
 
   event_times1=event_times1[1:nevent_times1]
   trans <- trans[ , ,1:nevent_times1,drop=FALSE]
+  #cat('TRT: dim(trans)=',dim(trans),'\n')
   perm_event_times1=order(event_times1)
+  #cat('TRT: perm_event_times1=',perm_event_times1,'\n')
   ordered_event_times1=event_times1[perm_event_times1]
-  trans <- trans[ , ,perm_event_times1]
+  trans <- trans[ , ,perm_event_times1, drop=FALSE]
+  #cat('TRT: dim(trans)=',dim(trans),'\n')
   unique_event_times1=ordered_event_times1
   num_state <- matrix(data=0,nrow=m+1,ncol=nevent_times1)
 
@@ -441,6 +452,9 @@ markov <- function(n0,n1,m,Time,Delta) {
         }
       }
       else {
+        for (j in event_num:m) {
+          trans_prob1[event_num,j,i]=0
+        }
         dist_state1[event_num,i] <- dist_state1[event_num,i-1]
       }
     }
@@ -515,9 +529,17 @@ markov <- function(n0,n1,m,Time,Delta) {
   trans <- trans[ , ,1:nevent_times2,drop=FALSE]
   perm_event_times2=order(event_times2)
   ordered_event_times2=event_times2[perm_event_times2]
-  trans <- trans[ , ,perm_event_times2]
+  trans <- trans[ , ,perm_event_times2, drop=FALSE]
   unique_event_times2=ordered_event_times2
   num_state <- matrix(data=0,nrow=m+1,ncol=nevent_times2)
+
+
+  # cat('After Loop 1: # of event times2=',nevent_times2,'\n')
+  # cat('Combined arm unique event times=','\n')
+  # print(unique_event_times2)
+  # cat('----------------------------------------------','\n')
+  # cat('----------------------------------------------','\n')
+
 
   # Initialize all patients into state 0
   for (k in 1:nevent_times2) {
@@ -608,6 +630,15 @@ markov <- function(n0,n1,m,Time,Delta) {
     }
   }
 
+  # cat('After Loop 2: # of event times2=',nunique_event_times2,'\n')
+  # cat('Combined arm unique event times=','\n')
+  # print(unique_event_times2)
+  # cat('dist_state2[]=','\n')
+  # print(dist_state2)
+  # cat('----------------------------------------------','\n')
+  # cat('----------------------------------------------','\n')
+
+
   # Loop 3
   i <- 2
   while(i <= nunique_event_times2) {
@@ -619,6 +650,9 @@ markov <- function(n0,n1,m,Time,Delta) {
         }
       }
       else {
+        for (j in event_num:m) {
+          trans_prob2[event_num,j,i]=0
+        }
         dist_state2[event_num,i] <- dist_state2[event_num,i-1]
       }
     }
@@ -643,6 +677,15 @@ markov <- function(n0,n1,m,Time,Delta) {
 
   # cat('----------------------------------------------','\n')
   # cat('----------------------------------------------','\n')
+  # cat('# of event times=',nunique_event_times2,'\n')
+  # cat('Combined arm unique event times=','\n')
+  # print(unique_event_times2)
+  # cat('dist_state2[]=','\n')
+  # print(dist_state2)
+  # cat('----------------------------------------------','\n')
+  # cat('----------------------------------------------','\n')
+  # cat('After loop3, max_follow2=',max_follow2,'\n')
+
   # cat('From markov:max_follow0=',max_follow0,'\n')
   # cat('From markov:max_follow1=',max_follow1,'\n')
   # cat('From markov:max_follow2=',max_follow2,'\n')

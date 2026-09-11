@@ -18,7 +18,7 @@ perm(
   z_comp,
   resample_num,
   seed,
-  nimp
+  max_time_inc
 )
 }
 \arguments{
@@ -51,7 +51,8 @@ represent covariate values.}
 
 \item{seed}{The seed used for random number generation.}
 
-\item{nimp}{The number of random imputations for Redistribution-to-the-right.}
+\item{max_time_inc}{Optional. Maximal time increment for updating multi-state distribution when parametric exponential extension models are used.
+If unspecified, updates done at each event time in combined trial.}
 }
 \value{
 A list of a vector of length resample_num containing the treatment effect estimates (for type='max' these are z-statistics) for each permutation,

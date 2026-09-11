@@ -6,16 +6,30 @@
 \usage{
 EWT(
   m,
+  Time,
+  Delta,
+  trt,
   dist_state0,
   dist_state1,
   unique_event_times0,
   unique_event_times1,
   nunique_event_times0,
-  nunique_event_times1
+  nunique_event_times1,
+  maxfollow0,
+  maxfollow1,
+  max_time_inc
 )
 }
 \arguments{
 \item{m}{The number of events in the hierarchy.}
+
+\item{Time}{A m x n matrix of event times (days). Rows should represent events and columns should represent participants. Rows should be
+in increasing order of clinical severity.}
+
+\item{Delta}{A m x n matrix of event indicators Rows should represent events and columns should represent participants. Rows should be
+in increasing order of clinical severity.}
+
+\item{trt}{A vector containing treatment arm indicators (1 for treatment, 0 for control).}
 
 \item{dist_state0}{A matrix of control arm state probabilities (returned from wintime::km() or wintime::markov()).}
 
@@ -28,9 +42,16 @@ EWT(
 \item{nunique_event_times0}{The number of unique control arm event times (returned from wintime::km() or wintime::markov()).}
 
 \item{nunique_event_times1}{The number of unique treatment arm event times (returned from wintime::km() or wintime::markov()).}
+
+\item{maxfollow0}{The max control arm time (days) for valid nonparametric state space estimation (returned from wintime::markov() or wintime::km()).}
+
+\item{maxfollow1}{The max trt arm time (days) for valid nonparametric state space estimation (returned from wintime::markov() or wintime::km()).}
+
+\item{max_time_inc}{Optional. Maximal time increment for updating multi-state distribution when parametric exponential extension models are used.
+If unspecified, updates done at each event time in combined trial.}
 }
 \value{
-A list of the expected win time of the treatment arm, the components of the treatment effect, and the maximum time used in comparisons.
+A list of the expected win time of the treatment arm, the components of the treatment effect.
 }
 \description{
 Calculates the state space probabilities using a Kaplan-Meier model (recommended) or a Markov model. This function uses these probabilities

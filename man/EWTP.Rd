@@ -15,7 +15,8 @@ EWTP(
   dist,
   markov_ind,
   cov,
-  trt
+  trt,
+  max_time_inc
 )
 }
 \arguments{
@@ -42,6 +43,9 @@ in increasing order of clinical severity.}
 \item{cov}{A n x p matrix of covariate values, where p is the number of covariates.}
 
 \item{trt}{A vector of length n containing treatment arm indicators (1 for treatment, 0 for control).}
+
+\item{max_time_inc}{Optional. Maximal time increment for updating multi-state distribution when parametric exponential extension models are used.
+If unspecified, updates done at each event time in combined trial.}
 }
 \value{
 A list containing: The estimated treatment effect from the linear regression model, the variance, the Z-statistic,

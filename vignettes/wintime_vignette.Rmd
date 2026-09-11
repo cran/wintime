@@ -8,7 +8,7 @@ vignette: >
 ---
 # wintime Package Guide
 
-This vignette demonstrates the use of the three available functions contained in the wintime package: `wintime`, `markov`, and `km`. The `wintime` function is the main function of the package that implements the methods described in "Use of win time for ordered composite endpoints in clinical trials," (Troendle et al. 2024), https://pubmed.ncbi.nlm.nih.gov/38417455/. This function accepts data with any number of endpoints and runs these methods on observed and resampled data. The `markov` function fits an extended  Markov model to estimate the state probabilities for each arm. The `km` function performs the same estimation using Kaplan-Meier models. 
+This vignette demonstrates the use of the three available functions contained in the wintime package: `wintime`, `markov`, and `km`. The `wintime` function is the main function of the package that implements the methods described in "Use of win time for ordered composite endpoints in clinical trials," (Troendle et al. 2024) <doi:10.1002/sim.10045>. This function accepts data with any number of endpoints and runs these methods on observed and resampled data. The `markov` function fits an extended  Markov model to estimate the state probabilities for each arm. The `km` function performs the same estimation using Kaplan-Meier models. 
 
 ## Installation
 

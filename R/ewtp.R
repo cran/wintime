@@ -16,246 +16,249 @@
 #' @param markov_ind An indicator of the model type used (1 for Markov, 0 for Kaplan-Meier).
 #' @param cov A n x p matrix of covariate values, where p is the number of covariates.
 #' @param trt A vector of length n containing treatment arm indicators (1 for treatment, 0 for control).
+#' @param max_time_inc Optional. Maximal time increment for updating multi-state distribution when parametric exponential extension models are used.
+#' If unspecified, updates done at each event time in combined trial.
 #' @return A list containing: The estimated treatment effect from the linear regression model, the variance, the Z-statistic,
 #' the components of the treatment effect, the variance of the components, and the maximum time used in comparisons.
 
 # -------------------------------------------
 # Expected win time against trial population
 # -------------------------------------------
-EWTP <- function(n,m,nunique,maxfollow,untimes,Time,Delta,dist,markov_ind,cov,trt) {
+EWTP <- function(n,m,nunique,maxfollow,untimes,Time,Delta,dist,markov_ind,cov,trt,max_time_inc) {
   time <- Time[m:1, ]
   delta <- Delta[m:1, ]
   components <- rep(NA,m)
   components_var <- rep(NA,m)
   ewtp <- numeric(n)
   ewtp_components <- matrix(0,nrow=m,ncol=n)
-  max_time <- 0
+  #max_time <- 0
 
+   # cat('Combined arm nunique=',nunique,'\n')
+   # cat('---------------------------------------','\n')
+   # cat('untimes=','\n')
+   # print(untimes)
+   # cat('dist[1,]=','\n')
+   # print(dist[1,])
+   # cat('dist[2,]=','\n')
+   # print(dist[2,])
+   # cat('dist[3,]=','\n')
+   # print(dist[3,])
+   # cat('dist[4,]=','\n')
+   # print(dist[4,])
+   # cat('--------------------------------------','\n')
 
-  # cat('Combined arm nunique=',nunique,'\n')
-  # cat('---------------------------------------','\n')
-  # cat('untimes=','\n')
+  # cat("-----------------------------------------------", "\n")
+  # cat("Before grid of times dist =", "\n")
+  # print(dist)
+  # cat("-----------------------------------------------", "\n")
+
+  #----------------------------------------------------------
+  # Get extended grid of times and update dist
+  #----------------------------------------------------------
+  max_number_before_grid=length(untimes[untimes < maxfollow])
+  if (!is.null(max_time_inc) & !is.na(max_time_inc)) {ceiling_after_grid=ceiling((untimes[nunique]-untimes[max_number_before_grid+1])/max_time_inc)}
+  if (!is.null(max_time_inc) & !is.na(max_time_inc)) {max_number_times=nunique+ceiling((untimes[nunique]-untimes[max_number_before_grid+1])/max_time_inc)}
+  if (is.null(max_time_inc) | is.na(max_time_inc)) {max_number_times=nunique}
+  new_untimes=rep(0,times=max_number_times)
+  new_untimes[1]=untimes[1]
+
+  new_dist=rep(0,max_number_times*(m+1))
+  dim(new_dist)=c(m+1,max_number_times)
+
+  new_dist[,1]=dist[,1]
+  count=1
+
+  #  cat("-----------------------------------------------", "\n")
+  #  cat("trt_count=",trt_count,"\n")
+  j=1
+  while (j <= nunique-1) {
+    # cat("-----------------------------------------------", "\n")
+    # cat("j=",j,"\n")
+    # if (i<10) {
+    #   cat("untimes[j+1]=",untimes[j+1],"\n")
+    #   cat("count=",count,"\n")
+    #   cat("-----------------------------------------------", "\n")
+    # }
+
+    if (!is.null(max_time_inc) & !is.na(max_time_inc)) {
+      if (untimes[j+1]-new_untimes[count] > max_time_inc & new_untimes[count] >= maxfollow) {
+        addnum=ceiling((untimes[j+1]-untimes[j])/max_time_inc)
+        #   cat("addnum triggered with addnum=",1,"\n")
+        for (addcount in 1:(addnum-1)) {
+          count=count+1
+          #    cat("count=",count,"\n")
+          new_untimes[count]=new_untimes[count-1]+(untimes[j+1]-untimes[j])/addnum
+          new_dist[,count]=new_dist[,count-1]
+        }
+      } else {
+        #    cat("addnum not triggered=","\n")
+        count=count+1
+        #    cat("count=",count,"\n")
+        new_untimes[count]=untimes[j+1]
+        new_dist[,count]=dist[,j+1]
+        j=j+1
+      }
+    } else {
+      count=count+1
+      new_untimes[count]=untimes[j+1]
+      new_dist[,count]=dist[,j+1]
+      j=j+1
+    }
+  }
+  nunique=count
+  untimes=new_untimes[1:nunique]
+  new_dist=new_dist[,1:nunique]
+
+  # cat("finished putting on common set of times and adding in update times", "\n")
+  # cat("-----------------------------------------------", "\n")
+  # cat("nunique=",nunique, "\n")
+  # cat("untimes=", "\n")
   # print(untimes)
-  # cat('dist[1,]=','\n')
-  # print(dist[1,])
-  # cat('dist[2,]=','\n')
-  # print(dist[2,])
-  # cat('dist[3,]=','\n')
-  # print(dist[3,])
-  # cat('dist[4,]=','\n')
-  # print(dist[4,])
-  # cat('--------------------------------------','\n')
+  # cat("-----------------------------------------------", "\n")
+  # cat("-----------------------------------------------", "\n")
+  # cat("after grid of times new_dist =", "\n")
+  # print(new_dist)
+  # cat("-----------------------------------------------", "\n")
 
-  # Check for extending comparisons when combined arm is 100% in terminal state
-  #extend=0
-  #if (dist[m+1,nunique]==1) {extend=1}
-
-  # Initialize temporary variables
-  #tuntimes <- numeric(nunique)
-  #tdist <- matrix(0,nrow=m+1,ncol=nunique)
-
-  # Start main loop
-  for (i in 1:n) {
-     # cat('---------------------------','\n')
-     # cat('Main loop subject i=',i,'\n')
-     # cat('Time[,i]=',Time[,i],'\n')
-     # cat('Delta[,i]=',Delta[,i],'\n')
-
-    # Create temp variables
-    # tnunique <- nunique
-    # for (j in 1:nunique) {
-    #   tuntimes[j] <- untimes[j]
-    # }
-
-    # Copy combined arm distributions
-    # for (event in 1:(m+1)) {
-    #   for (t in 1:min(nunique,ncol(dist))) {
-    #     tdist[event,t] <- dist[event,t]
-    #   }
-    # }
-
-  #   cat('---------------------------------------','\n')
-  #   cat('Before adding subject i times, tuntimes=','\n')
-  #   print(tuntimes)
-  #   cat('tdist[1,]=','\n')
-  #   print(tdist[1,])
-  #   cat('tdist[2,]=','\n')
-  #   print(tdist[2,])
-  #   cat('tdist[3,]=','\n')
-  #   print(tdist[3,])
-  #   cat('--------------------------------------','\n')
-  #
-  # #  Create addtime matrix
-  #   addtime <- matrix(data=NA,nrow=m,ncol=n)
-  #   addtime[1, ] <- (!(time[1, ] %in% untimes) & (time[1,] <= untimes[nunique] | extend==1))
-  #   for (k in 2:m) {
-  #     addtime[k, ] <- (!(time[k, ] %in% untimes) & delta[k, ] == 1 & (time[k,] <= untimes[nunique] | extend==1))
-  #   }
-  #
-  #
-  # #  Add events
-  #   for (event in 1:m) {
-  #     if (addtime[event,i] == TRUE) {
-  #       jstop <- 0
-  #       for (j in 1:tnunique) {
-  #         if (tuntimes[j] < time[event,i]) {
-  #           jstop <- jstop + 1
-  #         }
-  #         else {
-  #           break
-  #         }
-  #       }
-  #       if(jstop == 0) {
-  #         jstop <- 1
-  #       }
-  #
-  #       tnunique <- tnunique + 1
-  #       if (jstop==1) {
-  #         tdist[,tnunique] <- c(1,rep(0,times=m))
-  #       } else {
-  #         tdist[,tnunique] <- tdist[,jstop]
-  #       }
-  #       tuntimes[tnunique] <- time[event,i]
-  #       j <- tnunique
-  #
-  #       while(tuntimes[j] < tuntimes[j-1]) {
-  #         # swap indices j and (j-1)
-  #         temp <- tuntimes[j]
-  #         tuntimes[j] <- tuntimes[j-1]
-  #         tuntimes[j-1] <- temp
-  #         vtemp <- tdist[,j]
-  #         tdist[,j] <- tdist[,j-1]
-  #         tdist[,j-1] <- vtemp
-  #         j <- j - 1
-  #       }
-  #
-  #     }
-  #   }
-  #   tuntimes=tuntimes[1:tnunique]
-
-    # cat('--------------------------------------','\n')
-    # cat('After adding person i times: tuntimes==','\n')
-    # print(tuntimes)
-    # cat('tdist[1,]=','\n')
-    # print(tdist[1,])
-    # cat('tdist[2,]=','\n')
-    # print(tdist[2,])
-    # cat('tdist[3,]=','\n')
-    # print(tdist[3,])
-    # cat('--------------------------------------','\n')
-
-    # cat(' # nunique event times after addition of current subject=',tnunique,'\n')
-    # cat('unique event times after addition of current subject=',tuntimes,'\n')
-    # cat('combined arm dist=','\n')
-    # print(tdist)
-
-
-    # Set jmax
-    jmax <- 0
-    for (j in 1:nunique) {
-      if (untimes[j] < time[1,i]) {
-        jmax <- jmax + 1
+  #-------------------------------------------------------
+  # ESTIMATE TRANSITION RATES USING SIMPLE EXPONENTIAL
+  #-------------------------------------------------------
+  start_time=rep(0,times=n)
+  end_time=rep(0,times=n)
+  rate2=rep(0,times=m*m)
+  dim(rate2)=c(m,m)
+  for (prev_state in 1:m) {
+    #     cat("-----------------------------------------------", "\n")
+    #     cat("prev_state=",prev_state,"\n")
+    # Combined Arms
+    for (end_state in prev_state:m) {
+      #       cat("end_state=",end_state,"\n")
+      if (prev_state != 1) {
+        start_time=Time[prev_state-1,]
+        if (prev_state < m) {
+          end_time=apply(Time[prev_state:m,],2,min)
+        } else {
+          end_time=Time[m,]
+        }
+        end_time[Delta[prev_state-1,]==0]=start_time[Delta[prev_state-1,]==0]
+      } else {
+        end_time=apply(Time[prev_state:m,],2,min)
       }
-    }
-    #if (markov_ind == FALSE) {
-    #  jmax <- min(maxfollow,jmax)
-    #}
-    if (delta[1,i] == 1 | jmax >= nunique) {
-      jmax <- nunique - 1
-    }
-    max_time=max(max_time,untimes[jmax+1])
-#    if (i==3) {
-#      cat('jmax=',jmax,'\n')
-#    }
-
-    # cat('jmax=',jmax,'\n')
-    # cat('---------------------------------------','\n')
-
-
-    # Set state
-    if (jmax != 0) {
-      for (j in 1:jmax) {
-
-        #cat('j=',j,'\n')
-
-        state <- 0
-        for (current_state in m:1) {
-          temp_time_index <- m - current_state + 1
-          if (time[temp_time_index,i] <= untimes[j] && delta[temp_time_index,i] == 1) {
-            state <- current_state
-            break
-          }
-        }
-        #cat('state=',state,'\n')
-
-#        if (i==3) {
-#          cat('j=',j,'\n')
-#          cat('state=',state,'\n')
-#        }
-
-        # Calculate ewtp
-
-        # Calculate wins
-        for (state_num in 0:(m-1)) {
-          if (state_num == state) {
-            # Add probabilities from higher states
-            for (k in (state_num+1):m) {
-              ewtp[i] <- ewtp[i] + dist[k+1,j] * (untimes[j+1] - untimes[j])
-              ewtp_components[k,i] <- ewtp_components[k,i] + dist[k+1,j] * (untimes[j+1]-untimes[j])
-            }
-            break
-          }
-        }
-
-        # Calculate Losses
-        for (current in 1:m) {
-          if (current == state) {
-            # Subtract probabilities from lower states
-            for (k in 1:current) {
-              ewtp[i] <- ewtp[i] - dist[k,j] * (untimes[j+1] - untimes[j])
-              ewtp_components[current,i] <- ewtp_components[current,i] - dist[k,j] * (untimes[j+1]-untimes[j])
-            }
-            break
-          }
-        }
-#        if (i==3) {
-#          cat('ewtp=',ewtp[3],'\n')
-#        }
-
-        #cat('ewtp[',i,']=',ewtp[i],'\n')
-      }
+      #       cat("end_time=","\n")
+      #       print(end_time)
+      number_trans=length(end_time[end_time==Time[end_state,] & Delta[end_state,]==1 & end_time-start_time > 0])
+      total_duration=sum(end_time-start_time)
+      if (total_duration > 0) {rate2[prev_state,end_state]=number_trans/total_duration}
+      #       cat("number_trans=",number_trans,"\n")
+      #       cat("total_duration=",total_duration,"\n")
+      #       cat("rate2=",rate2[prev_state,end_state],"\n")
     }
   }
-  # cat('----------------------------------------------------','\n')
-  # cat('ewtp=','\n')
-  # print(ewtp)
-  # cat('----------------------------------------------------','\n')
+   # cat("-----------------------------------------------", "\n")
+   # cat("rate2=", "\n")
+   # print(rate2)
+  # cat("rate0=", "\n")
+  # print(rate0)
+  # cat("rate1=", "\n")
+  # print(rate1)
+  # cat("-----------------------------------------------", "\n")
 
+   #-------------------------------------------------------
+   # EXTEND NEW_DIST USING SIMPLE EXPONENTIAL
+   #-------------------------------------------------------
+   #old_dist=new_dist
+   j=length(untimes[untimes <= maxfollow])+1
+   while (j <= nunique) {
+     for (state in 1:m) {
+       new_dist[state,j]=new_dist[state,j-1]*exp(-1*sum(rate2[state,])*(untimes[j]-untimes[j-1]))
+       if (state > 1) {
+         for (prev_state in 1:(state-1)) {
+           if (sum(rate2[prev_state,])>0) {
+             new_dist[state,j]=new_dist[state,j]+new_dist[prev_state,j-1]*(1-exp(-1*sum(rate2[prev_state,])*(untimes[j]-untimes[j-1])))*
+               rate2[prev_state,state-1]/sum(rate2[prev_state,])
+           }
+         }
+       }
+     }
+     new_dist[m+1,j]=new_dist[m+1,j-1]
+     for (prev_state in 1:m) {
+       if (sum(rate2[prev_state,])>0) {
+         new_dist[m+1,j]=new_dist[m+1,j]+new_dist[prev_state,j-1]*(1-exp(-1*sum(rate2[prev_state,])*(untimes[j]-untimes[j-1])))*
+           rate2[prev_state,m]/sum(rate2[prev_state,])
+       }
+     }
+     j=j+1
+   }
+
+   # cat("-----------------------------------------------", "\n")
+   # cat("After extension new dist =", "\n")
+   # print(new_dist)
+   # cat("-----------------------------------------------", "\n")
+
+   #-------------------------------------------------------
+   #-------------------------------------------------------
+   # Start main loop over subjects
+   #-------------------------------------------------------
+   #-------------------------------------------------------
+   for (i in 1:n) {
+ #    cat("i=",i,"\n")
+     for (j in 1:(nunique-1)) {
+ #      if (i==1) {cat("j=",j,"\n")}
+       state=0
+       for (k in 0:(m-1)) {
+         if (Time[m-k,i] <= untimes[j] & Delta[m-k,i]==1) {
+           state=m-k
+           break
+         }
+       }
+ #      if (i==1) {cat("state=",state,"\n")}
+      # Calculate EWD for current time interval
+      # Wins
+       if (state < m) {
+         for (state2 in (state+2):(m+1)) {
+ #          if (i==1) {cat("wins:state2=",state2,"\n")}
+ #          if (i==1) {cat("wins:new_dist[state2,j]=",new_dist[state2,j],"\n")}
+           ewtp[i]=ewtp[i]+new_dist[state2,j]*(untimes[j+1]-untimes[j])
+           ewtp_components[state2-1,i]=ewtp_components[state2-1,i]+new_dist[state2,j]*(untimes[j+1]-untimes[j])
+         }
+       }
+      # Losses
+       if (state > 0) {
+         for (state2 in 1:state) {
+ #          if (i==1) {cat("losses:state2=",state2,"\n")}
+ #          if (i==1) {cat("wins:new_dist[state2,j]=",new_dist[state2,j],"\n")}
+           ewtp[i]=ewtp[i]-new_dist[state2,j]*(untimes[j+1]-untimes[j])
+           ewtp_components[state,i]=ewtp_components[state,i]-new_dist[state2,j]*(untimes[j+1]-untimes[j])
+         }
+       }
+ #      if (i==1) {cat("ewtp[i]=",ewtp[i],"\n")}
+     }
+ #    cat("final ewtp[i]=",ewtp[i],"\n")
+   }
   # Get treatment estimate and variance for Z statistic
-  fit_comp <- vector("list",m)
-  if (!is.null(cov)) {
-    fite=lm(ewtp~trt+cov)
-    for (k in 1:m) {
-      outcome <- ewtp_components[k,]
-      dim(outcome) <- c(n)
-      fit_comp[[k]] <- lm(outcome~trt+cov)
-    }
-  }
-  else {
-    fite <- lm(ewtp~trt)
-    for (k in 1:m) {
-      outcome <- ewtp_components[k,]
-      dim(outcome) <- c(n)
-      fit_comp[[k]] <- lm(outcome~trt)
-    }
-  }
-  ewtp_time=coef(fite)[2]
-  ewtp_time_var=vcov(fite)[2,2]
-  z_ewtp <- ewtp_time/sqrt(ewtp_time_var)
-  for (k in 1:m) {
-    components[k] <- coef(fit_comp[[k]])[2]
-    components_var[k] <- vcov(fit_comp[[k]])[2,2]
-  }
+   fit_comp <- vector("list",m)
+   if (!is.null(cov)) {
+     fite=lm(ewtp~trt+cov)
+     for (k in 1:m) {
+       outcome <- ewtp_components[k,]
+       dim(outcome) <- c(n)
+       fit_comp[[k]] <- lm(outcome~trt+cov)
+     }
+   } else {
+     fite <- lm(ewtp~trt)
+     for (k in 1:m) {
+       outcome <- ewtp_components[k,]
+       dim(outcome) <- c(n)
+       fit_comp[[k]] <- lm(outcome~trt)
+     }
+   }
+   ewtp_time=coef(fite)[2]
+   ewtp_time_var=vcov(fite)[2,2]
+   z_ewtp <- ewtp_time/sqrt(ewtp_time_var)
+   for (k in 1:m) {
+     components[k] <- coef(fit_comp[[k]])[2]
+     components_var[k] <- vcov(fit_comp[[k]])[2,2]
+   }
 
-  return(list(ewtp_time,ewtp_time_var,z_ewtp,components,components_var,max_time))
-}
+   return(list(ewtp_time,ewtp_time_var,z_ewtp,components,components_var))
+ }

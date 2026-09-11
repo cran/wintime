@@ -16,7 +16,8 @@ REWTP(
   markov_ind,
   cov,
   trt,
-  time_restriction
+  time_restriction,
+  max_time_inc
 )
 }
 \arguments{
@@ -45,6 +46,9 @@ in increasing order of clinical severity.}
 \item{trt}{A vector of length n containing treatment arm indicators (1 for treatment, 0 for control).}
 
 \item{time_restriction}{The time restriction (days) for calculation.}
+
+\item{max_time_inc}{Optional. Maximal time increment for updating multi-state distribution when parametric exponential extension models are used.
+If unspecified, updates done at each event time in combined trial.}
 }
 \value{
 A list containing: The estimated treatment effect from the linear regression model, the variance, the Z-statistic,

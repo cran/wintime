@@ -19,14 +19,15 @@
 #' @param z_comp The Z-statistic of the composite event approach.
 #' @param resample_num The number of desired permutations.
 #' @param seed The seed used for random number generation.
-#' @param nimp The number of random imputations for Redistribution-to-the-right.
+#' @param max_time_inc Optional. Maximal time increment for updating multi-state distribution when parametric exponential extension models are used.
+#' If unspecified, updates done at each event time in combined trial.
 #' @return A list of a vector of length resample_num containing the treatment effect estimates (for type='max' these are z-statistics) for each permutation,
 #' a m x resample_num matrix of the components of the treatment effect..
 
 # -------------------------------
 # Permutations
 # -------------------------------
-perm <- function(type,time_restriction,model,n,m,Time,Delta,trt,cov,z_ewtr,z_comp,resample_num,seed,nimp) {
+perm <- function(type,time_restriction,model,n,m,Time,Delta,trt,cov,z_ewtr,z_comp,resample_num,seed,max_time_inc) {
   # Initialize vector to hold permuted data values
   y <- rep(0,times = resample_num)
   components <- matrix(0,nrow=m,ncol=resample_num)
@@ -101,7 +102,7 @@ perm <- function(type,time_restriction,model,n,m,Time,Delta,trt,cov,z_ewtr,z_com
     # Type function calls
     type <- tolower(type)
     if (type == "ewt") {
-      temp <- EWT(m,dist_state0_perm,dist_state1_perm,untimes0_perm,untimes1_perm,nuntimes0_perm,nuntimes1_perm)
+      temp <- EWT(m,Time_perm,Delta_perm,trt_perm,dist_state0_perm,dist_state1_perm,untimes0_perm,untimes1_perm,nuntimes0_perm,nuntimes1_perm,max_follow0_perm,max_follow1_perm,max_time_inc)
       y[iperm] <- temp[[1]]
       components[,iperm] <- temp[[2]]
       }
@@ -111,35 +112,35 @@ perm <- function(type,time_restriction,model,n,m,Time,Delta,trt,cov,z_ewtr,z_com
       components[,iperm] <- temp[[4]]
     }
     else if (type == "ewtp") {
-      temp <- EWTP(n,m,nuntimes2_perm,max_follow2_perm,untimes2_perm,Time_perm,Delta_perm,dist_state2_perm,markov_ind,cov_perm,trt_perm)
+      temp <- EWTP(n,m,nuntimes2_perm,max_follow2_perm,untimes2_perm,Time_perm,Delta_perm,dist_state2_perm,markov_ind,cov_perm,trt_perm,max_time_inc)
       y[iperm] <- temp[[1]]
       components[,iperm] <- temp[[4]]
       #      cat('resampled components for iperm=',iperm,'\n')
       #      print(components[,iperm])
     }
     else if (type == "rewtp") {
-      temp <- REWTP(n,m,nuntimes2_perm,max_follow2_perm,untimes2_perm,Time_perm,Delta_perm,dist_state2_perm,markov_ind,cov_perm,trt_perm,time_restriction)
+      temp <- REWTP(n,m,nuntimes2_perm,max_follow2_perm,untimes2_perm,Time_perm,Delta_perm,dist_state2_perm,markov_ind,cov_perm,trt_perm,time_restriction,max_time_inc)
       y[iperm] <- temp[[1]]
       components[,iperm] <- temp[[4]]
       #      cat('resampled components for iperm=',iperm,'\n')
       #      print(components[,iperm])
     }
     else if (type == "ewtpr") {
-      temp <- EWTPR(n,m,nuntimes2_perm,max_follow2_perm,untimes2_perm,Time_perm,Delta_perm,dist_state2_perm,markov_ind,cov_perm,trt_perm,comkm_perm,trans_prob2_perm,nuntimes1_perm,max_follow1_perm,untimes1_perm,dist_state1_perm,trtkm_perm,trans_prob1_perm,nuntimes0_perm,max_follow0_perm,untimes0_perm,dist_state0_perm,conkm_perm,trans_prob0_perm,nimp)
+      temp <- EWTPR(n,m,nuntimes2_perm,max_follow2_perm,untimes2_perm,Time_perm,Delta_perm,dist_state2_perm,markov_ind,cov_perm,trt_perm,trans_prob2_perm,nuntimes1_perm,max_follow1_perm,untimes1_perm,dist_state1_perm,trans_prob1_perm,nuntimes0_perm,max_follow0_perm,untimes0_perm,dist_state0_perm,trans_prob0_perm,max_time_inc)
       y[iperm] <- temp[[1]]
       components[,iperm] <- temp[[4]]
       #      cat('resampled components for iperm=',iperm,'\n')
       #      print(components[,iperm])
     }
     else if (type == "rewtpr") {
-      temp <- REWTPR(n,m,nuntimes2_perm,max_follow2_perm,untimes2_perm,Time_perm,Delta_perm,dist_state2_perm,markov_ind,cov_perm,trt_perm,comkm_perm,trans_prob2_perm,time_restriction,nuntimes1_perm,max_follow1_perm,untimes1_perm,dist_state1_perm,trtkm_perm,trans_prob1_perm,nuntimes0_perm,max_follow0_perm,untimes0_perm,dist_state0_perm,conkm_perm,trans_prob0_perm,nimp)
+      temp <- REWTPR(n,m,nuntimes2_perm,max_follow2_perm,untimes2_perm,Time_perm,Delta_perm,dist_state2_perm,markov_ind,cov_perm,trt_perm,trans_prob2_perm,time_restriction,nuntimes1_perm,max_follow1_perm,untimes1_perm,dist_state1_perm,trans_prob1_perm,nuntimes0_perm,max_follow0_perm,untimes0_perm,dist_state0_perm,trans_prob0_perm,max_time_inc)
       y[iperm] <- temp[[1]]
       components[,iperm] <- temp[[4]]
       #      cat('resampled components for iperm=',iperm,'\n')
       #      print(components[,iperm])
     }
     else if (type == "rmt") {
-      temp <- RMT(m,time_restriction,dist_state0_perm,dist_state1_perm,untimes0_perm,untimes1_perm,nuntimes0_perm,nuntimes1_perm)
+      temp <- RMT(m,Time_perm,Delta_perm,trt_perm,time_restriction,dist_state0_perm,dist_state1_perm,untimes0_perm,untimes1_perm,nuntimes0_perm,nuntimes1_perm,max_follow0_perm,max_follow1_perm,max_time_inc)
       y[iperm] <- temp[[1]]
       components[,iperm] <- temp[[2]]
     }
