@@ -30,8 +30,25 @@ EWT <- function(m,Time,Delta,trt,dist_state0,dist_state1,unique_event_times0,uni
   n0=length(trt[trt==0])
   n1=length(trt[trt==1])
 
-  #cat('From ewt: n0=',n0,'\n')
-  #cat('From ewt: n1=',n1,'\n')
+  # cat('From ewt: n0=',n0,'\n')
+  # cat('From ewt: n1=',n1,'\n')
+  # cat("trt =", "\n")
+  # print(trt)
+  # cat("Time =", "\n")
+  # print(Time)
+  # cat("Delta =", "\n")
+  # print(Delta)
+  # cat('dist_state0[k,] for being in state k-1=','\n')
+  # print(dist_state0)
+  # cat('dist_state1[k,] for being in state k-1=','\n')
+  # print(dist_state1)
+  # cat('maxfollow0=',maxfollow0,'\n')
+  # cat('maxfollow1=',maxfollow1,'\n')
+  # cat('unique_event_times0=','\n')
+  # print(unique_event_times0)
+  # cat('unique_event_times1=','\n')
+  # print(unique_event_times1)
+
   # cat('From ewt: nunique_event_times0=',nunique_event_times0,'\n')
   # cat('From ewt: unique_event_times0=',unique_event_times0,'\n')
   # cat('From ewt: control group max event time=',max_follow0,'\n')
@@ -53,8 +70,8 @@ EWT <- function(m,Time,Delta,trt,dist_state0,dist_state1,unique_event_times0,uni
 
 
   # cat('-------------------------------------','\n')
-  # cat('Before restriction unique _event_times=','\n')
-  # print(unique_event_times)
+   # cat('Combined event times=','\n')
+   # print(untimes)
   # cat('-------------------------------------','\n')
   # cat('dist_state0[k,] for being in state k-1=','\n')
   # print(dist_state0)
@@ -173,6 +190,17 @@ EWT <- function(m,Time,Delta,trt,dist_state0,dist_state1,unique_event_times0,uni
   new_dist0=new_dist0[,1:nunique]
   new_dist1=new_dist1[,1:nunique]
 
+   # cat("-----------------------------------------------", "\n")
+   # cat("# of times for distribution calculation=",nunique,"\n")
+   # cat("times for distribution calculation=", "\n")
+   # print(untimes)
+   # cat("-----------------------------------------------", "\n")
+   # cat("Before extension new dist0 =", "\n")
+   # print(new_dist0)
+   # cat("Before extension new dist1 =", "\n")
+   # print(new_dist1)
+   # cat("-----------------------------------------------", "\n")
+
   #-------------------------------------------------------
   # ESTIMATE TRANSITION RATES USING SIMPLE EXPONENTIAL
   #-------------------------------------------------------
@@ -251,13 +279,20 @@ EWT <- function(m,Time,Delta,trt,dist_state0,dist_state1,unique_event_times0,uni
   # EXTEND NEW_DIST0 USING SIMPLE EXPONENTIAL
   #-------------------------------------------------------
   j=length(untimes[untimes <= maxfollow0])+1
+  #cat("-----------------------------------------------", "\n")
+  #cat("Enter loop to define new_dist0[,>maxfollow0]","\n")
   while (j <= nunique) {
+    #cat("-----------------------------------------------", "\n")
+    #cat("j=",j,"\n")
     for (state in 1:m) {
+      #cat("state=",state,"\n")
       new_dist0[state,j]=new_dist0[state,j-1]*exp(-1*sum(rate0[state,])*(untimes[j]-untimes[j-1]))
       if (state > 1) {
         for (prev_state in 1:(state-1)) {
-          new_dist0[state,j]=new_dist0[state,j]+new_dist0[prev_state,j-1]*(1-exp(-1*sum(rate0[prev_state,])*(untimes[j]-untimes[j-1])))*
-            rate0[prev_state,state-1]/sum(rate0[prev_state,])
+          if (sum(rate0[prev_state,])>0) {
+            new_dist0[state,j]=new_dist0[state,j]+new_dist0[prev_state,j-1]*(1-exp(-1*sum(rate0[prev_state,])*(untimes[j]-untimes[j-1])))*
+              rate0[prev_state,state-1]/sum(rate0[prev_state,])
+          }
         }
       }
     }
@@ -289,11 +324,14 @@ EWT <- function(m,Time,Delta,trt,dist_state0,dist_state1,unique_event_times0,uni
   #-------------------------------------------------------
   j=length(untimes[untimes <= maxfollow1])+1
   while (j <= nunique) {
- #   cat("j=",j,"\n")
+    # cat("j=",j,"\n")
     for (state in 1:m) {
- #     cat("state=",state,"\n")
+      # cat("state=",state,"\n")
+      # cat("sum(rate1[state,])=",sum(rate1[state,]),"\n")
+      # cat("new_dist1[state,j-1]=",new_dist1[state,j-1],"\n")
+      # cat("untimes[j]-untimes[j-1]=",untimes[j]-untimes[j-1],"\n")
       new_dist1[state,j]=new_dist1[state,j-1]*exp(-1*sum(rate1[state,])*(untimes[j]-untimes[j-1]))
- #     cat("Prob you start at state and stay: new_dist1[state,j]=",new_dist1[state,j],"\n")
+      # cat("Prob you start at state and stay: new_dist1[state,j]=",new_dist1[state,j],"\n")
       if (state > 1) {
         for (prev_state in 1:(state-1)) {
  #         cat("prev_state=",prev_state,"\n")
@@ -316,10 +354,11 @@ EWT <- function(m,Time,Delta,trt,dist_state0,dist_state1,unique_event_times0,uni
     j=j+1
   }
 
-   # cat("-----------------------------------------------", "\n")
-   # cat("After extension new dist1 =", "\n")
-   # print(new_dist1)
-   # cat("-----------------------------------------------", "\n")
+
+    # cat("-----------------------------------------------", "\n")
+    # cat("After extension new dist1 =", "\n")
+    # print(new_dist1)
+    # cat("-----------------------------------------------", "\n")
 
   # cat('-------------------------------------','\n')
   # cat('After restriction, # of times used in calculating EWT=',nunique_event_times,'\n')
@@ -363,10 +402,10 @@ EWT <- function(m,Time,Delta,trt,dist_state0,dist_state1,unique_event_times0,uni
     j=j+1
   }
 
-  # cat('-------------------------------------','\n')
-  # cat('-------------------------------------','\n')
-  # cat('Final ewt_time=',ewt_time,'\n')
-  # cat('-------------------------------------','\n')
+   # cat('-------------------------------------','\n')
+   # cat('-------------------------------------','\n')
+   # cat('Final ewt_time=',ewt_time,'\n')
+   # cat('-------------------------------------','\n')
 
   return(list(ewt_time,components))
 }

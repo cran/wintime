@@ -222,8 +222,10 @@ RMT <- function(m,Time,Delta,trt,time_restriction,dist_state0,dist_state1,unique
       new_dist0[state,j]=new_dist0[state,j-1]*exp(-1*sum(rate0[state,])*(untimes[j]-untimes[j-1]))
       if (state > 1) {
         for (prev_state in 1:(state-1)) {
-          new_dist0[state,j]=new_dist0[state,j]+new_dist0[prev_state,j-1]*(1-exp(-1*sum(rate0[prev_state,])*(untimes[j]-untimes[j-1])))*
-            rate0[prev_state,state-1]/sum(rate0[prev_state,])
+          if (sum(rate0[prev_state,])>0) {
+            new_dist0[state,j]=new_dist0[state,j]+new_dist0[prev_state,j-1]*(1-exp(-1*sum(rate0[prev_state,])*(untimes[j]-untimes[j-1])))*
+              rate0[prev_state,state-1]/sum(rate0[prev_state,])
+          }
         }
       }
     }

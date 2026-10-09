@@ -1,7 +1,7 @@
 Package: wintime
 Type: Package
 Title: Win Time Methods for Time-to-Event Data in Clinical Trials
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: c(person("James", "Troendle", email = "james.troendle@nih.gov", role = c("aut", "cre")),
            person("Samuel", "Lawrence", email = "roaders79@gmail.com", role = "aut"))
 Description: Performs an analysis of time-to-event clinical trial data using various "win time" methods, 
@@ -19,9 +19,9 @@ Config/testthat/edition: 3
 Depends: R (>= 3.5.0)
 Config/roxygen2/version: 8.1.0
 NeedsCompilation: no
-Packaged: 2026-09-11 14:43:32 UTC; troendlj
+Packaged: 2026-10-09 14:38:12 UTC; troendlj
 Author: James Troendle [aut, cre],
   Samuel Lawrence [aut]
 Maintainer: James Troendle <james.troendle@nih.gov>
 Repository: CRAN
-Date/Publication: 2026-09-11 15:50:02 UTC
+Date/Publication: 2026-10-09 15:30:02 UTC

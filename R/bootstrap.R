@@ -38,7 +38,9 @@ bootstrap <- function(type,time_restriction,model,n,m,Time,Delta,trt,cov,z_ewtr,
   n1=length(trt[trt==1])
   iboot <- 1
   while (iboot <= resample_num) {
-    # cat("iboot =",iboot,"\n")
+     # cat("iboot =",iboot,"\n")
+     # cat("------------------------------------","\n")
+     # cat("------------------------------------","\n")
     # Generate bootstrap samples
     #bootstrap_indices <- sample(1:n, size = n, replace = TRUE)
     bootstrap_indices0 <- sample(1:n0, size = n0, replace = TRUE)
@@ -65,6 +67,13 @@ bootstrap <- function(type,time_restriction,model,n,m,Time,Delta,trt,cov,z_ewtr,
     delta_boot <- delta_boot[ ,indices]
     # cat("dim cov_boot =", dim(cov_boot), "\n")
     cov_boot <- cov_boot[indices, ]
+
+    # cat("trt_boot =", "\n")
+    # print(trt_boot)
+    # cat("Time_boot =", "\n")
+    # print(Time_boot)
+    # cat("Delta_boot =", "\n")
+    # print(Delta_boot)
 
     # Set parameters for model fitting calls
     n0 <- sum(trt_boot == 0)
@@ -122,6 +131,7 @@ bootstrap <- function(type,time_restriction,model,n,m,Time,Delta,trt,cov,z_ewtr,
 
     # Type function calls
     if (type == "ewt") {
+      #cat("Call EWT","\n")
       temp <- EWT(m,Time_boot,Delta_boot,trt_boot,dist_state0_boot,dist_state1_boot,untimes0_boot,untimes1_boot,nuntimes0_boot,nuntimes1_boot,max_follow0_boot,max_follow1_boot,max_time_inc)
       y[iboot] <- temp[[1]]
       components[,iboot] <- temp[[2]]

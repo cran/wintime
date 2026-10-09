@@ -1,9 +1,9 @@
-adce598854f64ee268eb671c6dbb97f2 *DESCRIPTION
+1da9ccd7d70a2ecfab1cb05c73131728 *DESCRIPTION
 5cef32f4477458a24ffb12f53ab63e34 *LICENSE
 5d0850dc4713f29707b8ddc2673275d7 *NAMESPACE
-54b635e82b795a89cb37ab0cce591572 *R/bootstrap.R
+dd51373c087ea9009bb748523d95ea43 *R/bootstrap.R
 daa729f9168f2597d038c6e1cd7e305a *R/comp.R
-8cd4e7ff43d9adfb693a04fd13cb1ef3 *R/ewt.R
+145b0024a358290803abab61b97f3d5a *R/ewt.R
 9dab199a21ee633958a1bb56882cdf17 *R/ewtp.R
 dcdea1f5a4f6a45f34d127aae5601c19 *R/ewtpr.R
 4cb2722cdb359e988ec946331e80e15f *R/ewtr.R
@@ -14,7 +14,7 @@ a6794423a77ab2473f58cf4020265810 *R/perm.R
 c1dc324748b28056415214809b6840da *R/pwt.R
 02d0a6011f719e7dd2dc44d27cb885ce *R/rewtp.R
 f1afa5b27417f4f0095aa248962235e7 *R/rewtpr.R
-7465e11b9ff0ee4ce381a3d2280b893b *R/rmt.R
+43a677a6e17561515cbf796ce40fe49f *R/rmt.R
 81471e44841eb48539643cdccdf9499d *R/rpwt.R
 38cf1849ecd33331f193c619dfda067a *R/rwtr.R
 e08915e5a5d50cf688ce9b13ddf333fe *R/wintime.R
@@ -23,7 +23,7 @@ d41d8cd98f00b204e9800998ecf8427e *README.md
 aeaab4008317af2d4cd8a25f2f360df9 *build/vignette.rds
 8d9b2709d4ba912a7bd7b425d287120a *inst/doc/wintime_vignette.R
 ddff414a6b2a43db5ffdf5eb39a38d22 *inst/doc/wintime_vignette.Rmd
-10377b024570e731ab9541d122cce664 *inst/doc/wintime_vignette.html
+b8407d92e4f58b94eff54187ae1a9c4f *inst/doc/wintime_vignette.html
 e90abacdc7d4642b7bfc6adbade74761 *man/COMP.Rd
 c5c11a3059c8d232a0b3b3a4bb49abb7 *man/EWT.Rd
 eac0bf27eb24cdf7015953ba8d5db206 *man/EWTP.Rd
